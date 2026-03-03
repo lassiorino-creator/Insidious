@@ -10,7 +10,6 @@ from flask import Flask, render_template, request, redirect, url_for
 load_dotenv()
 
 # CONFIGURAZIONE PERCORSI PER VERCEL
-# Vercel ha una struttura diversa, dobbiamo dire a Flask dove sono i template
 app = Flask(__name__, 
             template_folder="../templates", 
             static_folder="../static")
@@ -44,7 +43,9 @@ def index(page_name=None):
         if not page_name or page_name.lower() == "home":
             current_ws = worksheets[0]
             page_name = current_ws.title
-            data = current_ws.get_all_values()
+            # Recupera e pulisce i dati dagli spazi bianchi
+            raw_data = current_ws.get_all_values()
+            data = [[cell.strip() for cell in row] for row in raw_data]
         elif page_name.lower() == "unisciti":
             data = [] 
             page_name = "Unisciti"
@@ -56,9 +57,13 @@ def index(page_name=None):
                     current_ws = ws
                     page_name = ws.title  
                     break
+            
             if not current_ws:
                 return f"Errore: Il foglio '{page_name}' non esiste.", 404
-            data = current_ws.get_all_values()
+            
+            # Recupera e pulisce i dati dagli spazi bianchi (IMPORTANTE PER I LINK)
+            raw_data = current_ws.get_all_values()
+            data = [[cell.strip() for cell in row] for row in raw_data]
         
         return render_template('base.html', menu=menu, content=data, current_page=page_name)
     except Exception as e:
@@ -107,6 +112,3 @@ def submit():
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
-
-# IMPORTANTE: Per Vercel serve questo oggetto 'app' esposto
-# Rimosso il codice serverless_wsgi e app.run()
