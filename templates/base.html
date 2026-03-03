@@ -218,15 +218,15 @@
         {% if current_page.lower() == 'squadra' %}
             <div class="squadra-grid">
                 {% for row in content %}
-                    {% if row[0] and not row[1] %}
+                    {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
-                    {% elif row[0] %}
+                    {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            <img src="{{ row[2] if row[2] else url_for('static', filename='player_insidious.jpg') }}" class="player-photo">
+                            <img src="{{ row[2] if (row|length > 2 and row[2]) else url_for('static', filename='player_insidious.jpg') }}" class="player-photo">
                             <div class="player-info">
                                 <div class="player-role">{{ row[0] }}</div>
                                 <div class="player-name">{{ row[1] }}</div>
-                                {% if row[3] %}<div class="player-desc">{{ row[3] }}</div>{% endif %}
+                                {% if row|length > 3 and row[3] %}<div class="player-desc">{{ row[3] }}</div>{% endif %}
                             </div>
                         </div>
                     {% endif %}
@@ -236,15 +236,23 @@
         {% elif 'competizioni' in current_page.lower() %}
             <div class="albo-grid">
                 {% for row in content %}
-                    {% if row[0] and not row[1] %}
+                    {# Controllo se la riga è un titolo (es. In Corso o Albo d'Oro) #}
+                    {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
-                    {% elif row[0] %}
+                    {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            <img src="{{ url_for('static', filename=row[2]) if row[2] else url_for('static', filename='coppa.png') }}" class="trophy-photo">
+                            {# Carica immagine se presente, altrimenti coppa standard #}
+                            <img src="{{ url_for('static', filename=row[2]) if (row|length > 2 and row[2]) else url_for('static', filename='coppa.png') }}" class="trophy-photo">
                             <div class="trophy-info">
                                 <div class="trophy-pos">{{ row[1] }}</div>
                                 <div class="trophy-name">{{ row[0] }}</div>
-                                {% if row[3] %}<div class="trophy-desc">{{ row[3] }}</div>{% endif %}
+                                {% if row|length > 3 and row[3] %}
+                                    {% if row[3].startswith('http') %}
+                                        <a href="{{ row[3] }}" target="_blank" style="color: #d4af37; text-decoration: none; font-weight: bold; border: 1px solid #d4af37; padding: 5px; margin-top: 10px; font-size: 10px; text-align: center;">VAI AL SITO</a>
+                                    {% else %}
+                                        <div class="trophy-desc">{{ row[3] }}</div>
+                                    {% endif %}
+                                {% endif %}
                             </div>
                         </div>
                     {% endif %}
@@ -260,29 +268,22 @@
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>Xbox</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="PC" required>PC</label>
                     </div>
-
                     <label class="form-label">Età</label>
                     <input type="number" name="eta" placeholder="La tua età" required>
-
                     <label class="form-label">Gamertag / PSN ID</label>
                     <input type="text" name="gamertag" placeholder="Il tuo ID di gioco" required>
-
                     <label class="form-label">Ruoli (Max 2)</label>
                     <input type="text" name="ruoli" placeholder="es. DC, ATT" required>
-                    
                     <label class="form-label">Club precedenti</label>
                     <input type="text" name="club_precedenti" placeholder="I tuoi club passati" required>
-                    
                     <label class="form-label">Disponibilità (Lun - Gio)</label>
                     <div class="selection-grid">
                         {% for g in ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'] %}
                         <label class="option-box"><input type="checkbox" name="giorni" value="{{ g }}"> {{ g }}</label>
                         {% endfor %}
                     </div>
-                    
                     <label class="form-label">Telefono / WhatsApp</label>
                     <input type="text" name="telefono" placeholder="Numero di telefono" required>
-                    
                     <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
                 </form>
             </div>
