@@ -87,12 +87,13 @@ def submit():
                 "color": 13938487, 
                 "fields": [
                     {"name": "🎮 Piattaforma", "value": piattaforma, "inline": True},
+                    {"name": "👦 Età", "value": piattaforma, "inline": True},
                     {"name": "🏃 Ruoli", "value": ruoli, "inline": True},
                     {"name": "📞 Telefono", "value": telefono, "inline": True},
                     {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno"},
                     {"name": "🏆 Esperienze", "value": competizioni or "Nessuna"},
                     {"name": "📅 Disponibilità", "value": giorni or "Non specificata"},
-                    {"name": "📝 Note / Discord ID", "value": note or "Nessuna"}
+                    {"name": "📝 Gametarg", "value": note or "Nessuna"}
                 ],
                 "footer": {"text": "Inviato dal sito ufficiale INSIDIOUS FC"}
             }]
@@ -112,3 +113,4 @@ def submit():
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
+
