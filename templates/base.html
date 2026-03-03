@@ -175,7 +175,7 @@
 <body>
 
     <nav>
-        <a href="/Home" class="nav-logo-link">
+        <a href="/" class="nav-logo-link">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="INSIDIOUS" class="nav-logo-img">
         </a>
         <div class="menu-toggle" id="mobile-menu">
@@ -183,25 +183,26 @@
         </div>
         <div class="nav-right-container" id="nav-content">
             <ul class="nav-links">
-                <li class="nav-item"><a href="/Home">Home</a></li>
+                {% for item in menu %}
                 <li class="nav-item">
-                    <a href="/Squadra">Squadra</a>
+                    <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
+                    {% if item.lower() == 'squadra' %}
                     <ul class="dropdown-content">
-                        <li><a href="/Squadra#staff">Staff</a></li>
-                        <li><a href="/Squadra#portieri">Portieri</a></li>
-                        <li><a href="/Squadra#difensori">Difensori</a></li>
-                        <li><a href="/Squadra#centrocampisti">Centrocampisti</a></li>
-                        <li><a href="/Squadra#attaccanti">Attaccanti</a></li>
+                        <li><a href="/squadra#staff">Staff</a></li>
+                        <li><a href="/squadra#portieri">Portieri</a></li>
+                        <li><a href="/squadra#difensori">Difensori</a></li>
+                        <li><a href="/squadra#centrocampisti">Centrocampisti</a></li>
+                        <li><a href="/squadra#attaccanti">Attaccanti</a></li>
                     </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="/Competizioni">Competizioni</a>
+                    {% elif item.lower() == 'competizioni' %}
                     <ul class="dropdown-content">
-                        <li><a href="/Competizioni#in-corso">In corso</a></li>
-                        <li><a href="/Competizioni#albo-doro">Albo d'oro</a></li>
+                        <li><a href="/competizioni#in-corso">In corso</a></li>
+                        <li><a href="/competizioni#albo-doro">Albo d'oro</a></li>
                     </ul>
+                    {% endif %}
                 </li>
-                <li class="nav-item"><a href="/Unisciti">Unisciti</a></li>
+                {% endfor %}
+                <li class="nav-item"><a href="/unisciti">Unisciti</a></li>
             </ul>
             <div class="nav-socials">
                 <a href="https://discord.gg/5jE6WneBmG" target="_blank"><i class="fab fa-discord"></i></a>
