@@ -146,7 +146,7 @@
         .storia-item { background: rgba(10, 10, 10, 0.8); padding: 40px; border-left: 5px solid #d4af37; margin-bottom: 30px; }
         .storia-titolo { font-size: 28px; font-weight: 900; color: #d4af37; text-transform: uppercase; margin-bottom: 15px; }
 
-        /* --- MOBILE REVISION (iPhone Fix) --- */
+        /* --- MOBILE REVISION --- */
         @media (max-width: 768px) {
             nav { height: 75px; padding: 0 20px; }
             .nav-logo-img { height: 40px; }
@@ -162,7 +162,7 @@
             .dropdown-content { position: static; min-width: 100%; background: #111; display: block; border: none; }
             
             .squadra-grid, .albo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .player-info, .trophy-info { opacity: 1; padding: 12px; }
+            .player-info, .trophy-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
             .player-name, .trophy-name { font-size: 15px; }
             .player-role, .trophy-pos { font-size: 8px; }
             .player-desc, .trophy-desc { font-size: 10px; }
@@ -222,7 +222,7 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            <img src="{{ row[2] if (row|length > 2 and row[2]) else url_for('static', filename='player_insidious.jpg') }}" class="player-photo">
+                            <img src="{{ url_for('static', filename=row[2].replace('static/', '')) if (row|length > 2 and row[2]) else url_for('static', filename='player_insidious.png') }}" class="player-photo">
                             <div class="player-info">
                                 <div class="player-role">{{ row[0] }}</div>
                                 <div class="player-name">{{ row[1] }}</div>
@@ -236,31 +236,37 @@
         {% elif 'competizioni' in current_page.lower() %}
             <div class="albo-grid">
                 {% for row in content %}
-                    {# TITOLI (Es: "In Corso") #}
+                    {# TITOLI SEZIONI #}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     
-                    {# CARD COMPETIZIONE (5 COLONNE) #}
+                    {# CARD COMPETIZIONE #}
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            {# Col 3: Immagine #}
                             <img src="{{ url_for('static', filename=row[2]) if (row|length > 2 and row[2]) else url_for('static', filename='coppa.png') }}" class="trophy-photo">
                             
                             <div class="trophy-info">
-                                {# Col 2: Stagione #}
                                 <div class="trophy-pos">{{ row[1] }}</div>
-                                
-                                {# Col 1: Nome #}
                                 <div class="trophy-name">{{ row[0] }}</div>
                                 
-                                {# Col 4: Posizionamento #}
-                                {% if row|length > 3 and row[3] %}
-                                    <div class="trophy-desc">{{ row[3] }}</div>
+                                {# RICERCA LINK E POSIZIONAMENTO NELLE COLONNE RIMANENTI #}
+                                {% set link_esterno = [] %}
+                                {% set desc_testo = [] %}
+                                
+                                {% for cell in row[3:] %}
+                                    {% if cell.strip().startswith('http') %}
+                                        {% do link_esterno.append(cell.strip()) %}
+                                    {% elif cell.strip() != "" %}
+                                        {% do desc_testo.append(cell.strip()) %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if desc_testo %}
+                                    <div class="trophy-desc">{{ desc_testo[0] }}</div>
                                 {% endif %}
 
-                                {# Col 5: Link #}
-                                {% if row|length > 4 and row[4] and row[4].strip().startswith('http') %}
-                                    <a href="{{ row[4].strip() }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 2px;">VAI AL SITO</a>
+                                {% if link_esterno %}
+                                    <a href="{{ link_esterno[0] }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -277,14 +283,14 @@
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>Xbox</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="PC" required>PC</label>
                     </div>
-                    <label class="form-label">Età</label>
-                    <input type="number" name="eta" placeholder="La tua età" required>
                     <label class="form-label">Gamertag / PSN ID</label>
                     <input type="text" name="gamertag" placeholder="Il tuo ID di gioco" required>
-                    <label class="form-label">Ruoli (Max 2)</label>
-                    <input type="text" name="ruoli" placeholder="es. DC, ATT" required>
+                    <label class="form-label">Ruoli (es. DC, ATT)</label>
+                    <input type="text" name="ruoli" placeholder="Indica i tuoi ruoli principali" required>
                     <label class="form-label">Club precedenti</label>
-                    <input type="text" name="club_precedenti" placeholder="I tuoi club passati" required>
+                    <input type="text" name="club_precedenti" placeholder="I tuoi club passati">
+                    <label class="form-label">Competizioni giocate</label>
+                    <input type="text" name="competizioni" placeholder="VPG, VPL, ecc.">
                     <label class="form-label">Disponibilità (Lun - Gio)</label>
                     <div class="selection-grid">
                         {% for g in ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'] %}
@@ -293,6 +299,8 @@
                     </div>
                     <label class="form-label">Telefono / WhatsApp</label>
                     <input type="text" name="telefono" placeholder="Numero di telefono" required>
+                    <label class="form-label">Note / Discord ID</label>
+                    <textarea name="note" placeholder="Altre informazioni utili..."></textarea>
                     <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
                 </form>
             </div>
@@ -300,10 +308,12 @@
         {% else %}
             <div class="home-storia-container">
                 {% for row in content %}
+                    {% if row|length >= 2 %}
                     <div class="storia-item" data-aos="fade-up">
                         <div class="storia-titolo">{{ row[0] }}</div>
                         <p class="storia-testo">{{ row[1] }}</p>
                     </div>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% endif %}
