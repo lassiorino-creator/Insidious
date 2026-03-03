@@ -236,22 +236,31 @@
         {% elif 'competizioni' in current_page.lower() %}
             <div class="albo-grid">
                 {% for row in content %}
-                    {# Controllo se la riga è un titolo (es. In Corso o Albo d'Oro) #}
+                    {# TITOLI (Es: "In Corso") #}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
+                    
+                    {# CARD COMPETIZIONE (5 COLONNE) #}
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            {# Carica immagine se presente, altrimenti coppa standard #}
+                            {# Col 3: Immagine #}
                             <img src="{{ url_for('static', filename=row[2]) if (row|length > 2 and row[2]) else url_for('static', filename='coppa.png') }}" class="trophy-photo">
+                            
                             <div class="trophy-info">
+                                {# Col 2: Stagione #}
                                 <div class="trophy-pos">{{ row[1] }}</div>
+                                
+                                {# Col 1: Nome #}
                                 <div class="trophy-name">{{ row[0] }}</div>
+                                
+                                {# Col 4: Posizionamento #}
                                 {% if row|length > 3 and row[3] %}
-                                    {% if row[3].startswith('http') %}
-                                        <a href="{{ row[3] }}" target="_blank" style="color: #d4af37; text-decoration: none; font-weight: bold; border: 1px solid #d4af37; padding: 5px; margin-top: 10px; font-size: 10px; text-align: center;">VAI AL SITO</a>
-                                    {% else %}
-                                        <div class="trophy-desc">{{ row[3] }}</div>
-                                    {% endif %}
+                                    <div class="trophy-desc">{{ row[3] }}</div>
+                                {% endif %}
+
+                                {# Col 5: Link #}
+                                {% if row|length > 4 and row[4] and row[4].strip().startswith('http') %}
+                                    <a href="{{ row[4].strip() }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 2px;">VAI AL SITO</a>
                                 {% endif %}
                             </div>
                         </div>
