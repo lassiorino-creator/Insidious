@@ -6,27 +6,28 @@ from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
 from flask import Flask, render_template, request, redirect, url_for
 
-# Carica le variabili dal file .env (solo per uso locale)
+# Carica variabili locali se presenti
 load_dotenv()
 
-app = Flask(__name__)
+# CONFIGURAZIONE PERCORSI PER VERCEL
+# Vercel ha una struttura diversa, dobbiamo dire a Flask dove sono i template
+app = Flask(__name__, 
+            template_folder="../templates", 
+            static_folder="../static")
 
-# Configurazione recuperata dalle Variabili d'Ambiente (Netlify o file .env)
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 GOOGLE_SHEET_KEY = os.getenv("GOOGLE_SHEET_KEY")
 
 def connect_sheet():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    
-    # Prova a leggere il contenuto del JSON dalla variabile d'ambiente (per l'hosting online)
     creds_json_string = os.getenv("GOOGLE_CREDENTIALS_JSON")
     
     if creds_json_string:
-        # Se siamo online (Netlify), carichiamo i dati dalla stringa JSON
+        # Online su Vercel
         creds_info = json.loads(creds_json_string)
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_info, scope)
     else:
-        # Se siamo in locale, carichiamo dal file fisico credentials.json
+        # Locale
         creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
         
     client = gspread.authorize(creds)
@@ -38,18 +39,15 @@ def index(page_name=None):
     try:
         sheet = connect_sheet()
         worksheets = sheet.worksheets()
-        
         menu = [ws.title for ws in worksheets if ws.title != "ISCRIZIONI"]
         
         if not page_name or page_name.lower() == "home":
             current_ws = worksheets[0]
             page_name = current_ws.title
             data = current_ws.get_all_values()
-            
         elif page_name.lower() == "unisciti":
             data = [] 
             page_name = "Unisciti"
-            
         else:
             target_name = page_name.replace('-', ' ').lower().strip()
             current_ws = None
@@ -58,14 +56,11 @@ def index(page_name=None):
                     current_ws = ws
                     page_name = ws.title  
                     break
-            
             if not current_ws:
                 return f"Errore: Il foglio '{page_name}' non esiste.", 404
-            
             data = current_ws.get_all_values()
         
         return render_template('base.html', menu=menu, content=data, current_page=page_name)
-    
     except Exception as e:
         return f"Errore di connessione: {e}", 500
 
@@ -80,7 +75,6 @@ def submit():
         telefono = request.form.get('telefono')
         note = request.form.get('note')
 
-        # Notifica Discord
         discord_data = {
             "username": "INSIDIOUS RECRUITER",
             "embeds": [{
@@ -99,12 +93,9 @@ def submit():
             }]
         }
         
-        try:
+        if DISCORD_WEBHOOK_URL:
             requests.post(DISCORD_WEBHOOK_URL, json=discord_data)
-        except Exception as e:
-            print(f"Errore invio Discord: {e}")
 
-        # Google Sheets
         sheet = connect_sheet()
         try:
             ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
@@ -113,15 +104,9 @@ def submit():
             ws_iscrizioni.append_row(["TELEFONO", "PIATTAFORMA", "RUOLI", "CLUB PRECEDENTI", "COMPETIZIONI", "DISPONIBILITA", "NOTE/DISCORD"])
 
         ws_iscrizioni.append_row([telefono, piattaforma, ruoli, club_precedenti, competizioni, giorni, note])
-        
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
-    
     except Exception as e:
-        return f"Errore invio: {e}"
+        return f"Errore invio: {e}", 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
-import serverless_wsgi
-def handler(event, context):
-    return serverless_wsgi.handle_request(app, event, context)
+# IMPORTANTE: Per Vercel serve questo oggetto 'app' esposto
+# Rimosso il codice serverless_wsgi e app.run()
