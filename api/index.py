@@ -76,12 +76,13 @@ def index(page_name=None):
 def submit():
     try:
         piattaforma = request.form.get('piattaforma')
+        età = request.form.get('età')
         ruoli = request.form.get('ruoli')
-        club_precedenti = request.form.get('club_precedenti')
-        competizioni = request.form.get('competizioni')
-        giorni = ", ".join(request.form.getlist('giorni'))
         telefono = request.form.get('telefono')
-        note = request.form.get('note')
+        club precedenti = ", ".join(request.form.getlist('club precedenti'))
+        esperienze = request.form.get('esperienze')
+        disponibilità = request.form.get('disponibilità')
+        gametarg = request.form.get('gametarg')
 
         discord_data = {
             "username": "INSIDIOUS RECRUITER",
