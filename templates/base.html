@@ -101,7 +101,6 @@
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
-        /* FORM STYLES */
         .form-container {
             background-color: rgba(17, 17, 17, 0.85); padding: 40px; border: 1px solid #d4af37;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); max-width: 800px; margin: 0 auto 30px;
@@ -190,8 +189,12 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            {% set img_file = row[2].strip().replace('static/', '').replace('/', '') if (row|length > 2 and row[2]) else 'player_insidious.png' %}
-                            <img src="{{ url_for('static', filename=img_file) }}" 
+                            {# Pulizia avanzata: rimuove percorsi, slash e spazi #}
+                            {% set raw_val = row[2] if (row|length > 2 and row[2]) else '' %}
+                            {% set img_file = raw_val.strip().replace('static/', '').replace('static\\', '').replace('/', '').replace('\\', '') %}
+                            {% if not img_file %}{% set img_file = 'player_insidious.png' %}{% endif %}
+                            
+                            <img src="{{ url_for('static', filename=img_file) }}?v=1" 
                                  onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" 
                                  class="player-photo">
                             <div class="player-info">
@@ -211,8 +214,11 @@
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            {% set trophy_file = row[2].strip().replace('static/', '').replace('/', '') if (row|length > 2 and row[2]) else 'coppa.png' %}
-                            <img src="{{ url_for('static', filename=trophy_file) }}" 
+                            {% set raw_val = row[2] if (row|length > 2 and row[2]) else '' %}
+                            {% set trophy_file = raw_val.strip().replace('static/', '').replace('static\\', '').replace('/', '').replace('\\', '') %}
+                            {% if not trophy_file %}{% set trophy_file = 'coppa.png' %}{% endif %}
+
+                            <img src="{{ url_for('static', filename=trophy_file) }}?v=1" 
                                  onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
                                  class="trophy-photo">
                             <div class="trophy-info">
