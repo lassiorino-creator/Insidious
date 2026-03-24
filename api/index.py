@@ -111,9 +111,9 @@ def submit():
             ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
         except:
             ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="7")
-            ws_iscrizioni.append_row(["TELEFONO", "PIATTAFORMA", "RUOLI", "CLUB PRECEDENTI", "COMPETIZIONI", "DISPONIBILITA", "NOTE/DISCORD"])
+            ws_iscrizioni.append_row(["PIATTAFORMA", "ETà", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITà", "GAMETARG"])
 
-        ws_iscrizioni.append_row([telefono, piattaforma, ruoli, club_precedenti, competizioni, giorni, note])
+        ws_iscrizioni.append_row([piattaforma, età, ruoli, telefono, club precedenti, esperienze, disponibilità, gametarg])
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
