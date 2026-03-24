@@ -14,6 +14,9 @@ app = Flask(__name__,
             template_folder="../templates", 
             static_folder="../static")
 
+# ATTIVAZIONE ESTENSIONE "DO" PER JINJA2 (Risolve l'errore nel template)
+app.jinja_env.add_extension('jinja2.ext.do')
+
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
 GOOGLE_SHEET_KEY = os.getenv("GOOGLE_SHEET_KEY")
 
@@ -113,4 +116,3 @@ def submit():
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
-
