@@ -61,6 +61,7 @@
             display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
         }
         .dropdown-content li a:hover { background: #d4af37; color: #000; }
+        
         main { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
         h1 {
             font-size: clamp(35px, 8vw, 60px); font-weight: 900; text-transform: uppercase; color: #ffffff;
@@ -80,15 +81,13 @@
             position: relative; aspect-ratio: 3/4; background: rgba(17, 17, 17, 0.7);
             overflow: hidden; cursor: pointer; border: 1px solid rgba(212, 175, 55, 0.2);
         }
-        .trophy-card { background: #0a0a0a; }
         .player-photo {
             width: 100%; height: 100%; object-fit: cover; 
             filter: grayscale(80%); transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1), filter 0.5s ease;
         }
         .trophy-photo {
             width: 100%; height: 100%; 
-            object-fit: contain;
-            padding: 20px;
+            object-fit: contain; padding: 20px;
             filter: grayscale(80%); transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1), filter 0.5s ease;
         }
         .player-info, .trophy-info {
@@ -101,6 +100,8 @@
         .player-name, .trophy-name { font-size: 26px; font-weight: 900; text-transform: uppercase; color: #fff; line-height: 1.1; }
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
+        
+        /* FORM STYLES */
         .form-container {
             background-color: rgba(17, 17, 17, 0.85); padding: 40px; border: 1px solid #d4af37;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); max-width: 800px; margin: 0 auto 30px;
@@ -116,12 +117,13 @@
         .option-box:has(input:checked) { background: linear-gradient(145deg, #d4af37, #aa8a2e); color: #000; border-color: #fff; }
         input[type="text"], input[type="number"], textarea { width: 100%; padding: 15px; border: 1px solid #444; background-color: rgba(0, 0, 0, 0.7); color: #fff; font-size: 14px; outline: none; }
         .submit-btn { width: 100%; background: linear-gradient(145deg, #d4af37, #aa8a2e); color: #000; padding: 20px; border: none; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; letter-spacing: 3px; margin-top: 40px; }
+        
         .home-storia-container { max-width: 1000px; margin: 0 auto; }
         .storia-item { background: rgba(10, 10, 10, 0.8); padding: 40px; border-left: 5px solid #d4af37; margin-bottom: 30px; }
         .storia-titolo { font-size: 28px; font-weight: 900; color: #d4af37; text-transform: uppercase; margin-bottom: 15px; }
+
         @media (max-width: 768px) {
-            nav { height: 75px; padding: 0 20px; }
-            .nav-logo-img { height: 40px; }
+            nav { height: 75px; }
             .menu-toggle { display: block; }
             .nav-right-container {
                 position: fixed; top: 75px; left: -100%; width: 100%; height: calc(100vh - 75px);
@@ -132,14 +134,9 @@
             .nav-links { flex-direction: column; width: 100%; }
             .nav-item { margin: 15px 0; width: 100%; text-align: center; }
             .dropdown-content { position: static; min-width: 100%; background: #111; display: block; border: none; }
-            .squadra-grid, .albo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .player-info, .trophy-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
-            .player-name, .trophy-name { font-size: 15px; }
-            .player-role, .trophy-pos { font-size: 8px; }
-            .player-desc, .trophy-desc { font-size: 10px; }
-            .form-container { padding: 20px; }
-            main { padding: 0 10px; }
-            .trophy-photo { padding: 10px; }
+            .squadra-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .player-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
+            .player-name { font-size: 15px; }
         }
     </style>
 </head>
@@ -148,7 +145,6 @@
     <nav>
         <a href="/" class="nav-logo-link">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="INSIDIOUS" class="nav-logo-img">
-            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="INSIDIOUS" class="nav-logo-img">
         </a>
         <div class="menu-toggle" id="mobile-menu">
             <i class="fas fa-bars"></i>
@@ -194,7 +190,10 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            <img src="{{ url_for('static', filename=row[2]|replace('static/', '')|trim) if (row|length > 2 and row[2]) else url_for('static', filename='player_insidious.png') }}" class="player-photo">
+                            {% set img_file = row[2].strip().replace('static/', '').replace('/', '') if (row|length > 2 and row[2]) else 'player_insidious.png' %}
+                            <img src="{{ url_for('static', filename=img_file) }}" 
+                                 onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" 
+                                 class="player-photo">
                             <div class="player-info">
                                 <div class="player-role">{{ row[0] }}</div>
                                 <div class="player-name">{{ row[1] }}</div>
@@ -210,32 +209,25 @@
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
-                    
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            <img src="{{ url_for('static', filename=row[2]|replace('static/', '')|trim) if (row|length > 2 and row[2]) else url_for('static', filename='coppa.png') }}" class="trophy-photo">
-                            
+                            {% set trophy_file = row[2].strip().replace('static/', '').replace('/', '') if (row|length > 2 and row[2]) else 'coppa.png' %}
+                            <img src="{{ url_for('static', filename=trophy_file) }}" 
+                                 onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
+                                 class="trophy-photo">
                             <div class="trophy-info">
                                 <div class="trophy-pos">{{ row[1] }}</div>
                                 <div class="trophy-name">{{ row[0] }}</div>
                                 
-                                {% set link_esterno = [] %}
-                                {% set desc_testo = [] %}
-                                
+                                {% set links = [] %}{% set descs = [] %}
                                 {% for cell in row[3:] %}
-                                    {% if cell.strip().startswith('http') %}
-                                        {% set _ = link_esterno.append(cell.strip()) %}
-                                    {% elif cell.strip() != "" %}
-                                        {% set _ = desc_testo.append(cell.strip()) %}
-                                    {% endif %}
+                                    {% if cell.strip().startswith('http') %}{% set _ = links.append(cell.strip()) %}
+                                    {% elif cell.strip() != "" %}{% set _ = descs.append(cell.strip()) %}{% endif %}
                                 {% endfor %}
 
-                                {% if desc_testo %}
-                                    <div class="trophy-desc">{{ desc_testo[0] }}</div>
-                                {% endif %}
-
-                                {% if link_esterno %}
-                                    <a href="{{ link_esterno[0] }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
+                                {% if descs %}<div class="trophy-desc">{{ descs[0] }}</div>{% endif %}
+                                {% if links %}
+                                    <a href="{{ links[0] }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -252,24 +244,32 @@
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>Xbox</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="PC" required>PC</label>
                     </div>
+                    
                     <label class="form-label">Gamertag / PSN ID</label>
                     <input type="text" name="gamertag" placeholder="Il tuo ID di gioco" required>
+                    
                     <label class="form-label">Ruoli (es. DC, ATT)</label>
                     <input type="text" name="ruoli" placeholder="Indica i tuoi ruoli principali" required>
+                    
                     <label class="form-label">Club precedenti</label>
                     <input type="text" name="club_precedenti" placeholder="I tuoi club passati">
+                    
                     <label class="form-label">Competizioni giocate</label>
                     <input type="text" name="competizioni" placeholder="VPG, VPL, ecc.">
+                    
                     <label class="form-label">Disponibilità (Lun - Gio)</label>
                     <div class="selection-grid">
                         {% for g in ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì'] %}
                         <label class="option-box"><input type="checkbox" name="giorni" value="{{ g }}"> {{ g }}</label>
                         {% endfor %}
                     </div>
+                    
                     <label class="form-label">Telefono / WhatsApp</label>
                     <input type="text" name="telefono" placeholder="Numero di telefono" required>
+                    
                     <label class="form-label">Note / Discord ID</label>
                     <textarea name="note" placeholder="Altre informazioni utili..."></textarea>
+                    
                     <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
                 </form>
             </div>
