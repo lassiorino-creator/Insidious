@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     
     <style>
-        /* (Il tuo CSS rimane invariato, lo ometto per brevità ma va mantenuto tutto) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
@@ -224,9 +223,9 @@
                                 
                                 {% for cell in row[3:] %}
                                     {% if cell.strip().startswith('http') %}
-                                        {% do link_esterno.append(cell.strip()) %}
+                                        {% set _ = link_esterno.append(cell.strip()) %}
                                     {% elif cell.strip() != "" %}
-                                        {% do desc_testo.append(cell.strip()) %}
+                                        {% set _ = desc_testo.append(cell.strip()) %}
                                     {% endif %}
                                 {% endfor %}
 
