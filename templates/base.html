@@ -121,7 +121,7 @@
         .option-box:hover { border-color: #d4af37; color: #d4af37; }
         .option-box input { display: none; }
         .option-box:has(input:checked) { background: linear-gradient(145deg, #d4af37, #aa8a2e); color: #000; border-color: #fff; }
-        input[type="text"], textarea { width: 100%; padding: 15px; border: 1px solid #444; background-color: rgba(0, 0, 0, 0.7); color: #fff; font-size: 14px; outline: none; }
+        input[type="text"], input[type="number"], textarea { width: 100%; padding: 15px; border: 1px solid #444; background-color: rgba(0, 0, 0, 0.7); color: #fff; font-size: 14px; outline: none; }
         .submit-btn { width: 100%; background: linear-gradient(145deg, #d4af37, #aa8a2e); color: #000; padding: 20px; border: none; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; letter-spacing: 3px; margin-top: 40px; }
         
         /* Storia / Home */
@@ -198,12 +198,12 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            {# Logica PNG: Pulisce il nome e aggiunge .png se manca l'estensione #}
+                            {# LOGICA PNG: Rimuove l'estensione originale e forza .png #}
                             {% set raw_val = row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png' %}
-                            {% set clean_name = raw_val.split('/')[-1].split('\\')[-1] %}
-                            {% if '.' not in clean_name %}{% set clean_name = clean_name + '.png' %}{% endif %}
+                            {% set name_only = raw_val.split('/')[-1].split('\\')[-1].split('.')[0] %}
+                            {% set final_png = name_only + '.png' %}
                             
-                            <img src="{{ url_for('static', filename=clean_name) }}" 
+                            <img src="{{ url_for('static', filename=final_png) }}" 
                                  onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" 
                                  class="player-photo">
                             <div class="player-info">
@@ -223,11 +223,12 @@
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
+                            {# LOGICA PNG TROFEI #}
                             {% set raw_trophy = row[2]|string|trim if (row|length > 2 and row[2]) else 'coppa.png' %}
-                            {% set clean_trophy = raw_trophy.split('/')[-1].split('\\')[-1] %}
-                            {% if '.' not in clean_trophy %}{% set clean_trophy = clean_trophy + '.png' %}{% endif %}
+                            {% set trophy_name = raw_trophy.split('/')[-1].split('\\')[-1].split('.')[0] %}
+                            {% set final_trophy = trophy_name + '.png' %}
 
-                            <img src="{{ url_for('static', filename=clean_trophy) }}" 
+                            <img src="{{ url_for('static', filename=final_trophy) }}" 
                                  onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
                                  class="trophy-photo">
                             <div class="trophy-info">
@@ -253,18 +254,35 @@
                 <form action="/submit" method="post">
                     <label class="form-label">Piattaforma</label>
                     <div class="selection-grid">
-                        <label class="option-box"><input type="radio" name="piattaforma" value="Playstation" required>PS5</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>XBOX</label>
+                        <label class="option-box"><input type="radio" name="piattaforma" value="Playstation" required>PS5</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="PC" required>PC</label>
                     </div>
+                    
                     <label class="form-label">Gamertag / PSN ID</label>
-                    <input type="text" name="gamertag" placeholder="Il tuo ID" required>
+                    <input type="text" name="gametarg" placeholder="Il tuo ID di gioco" required>
+
+                    <label class="form-label">Età</label>
+                    <input type="number" name="età" placeholder="La tua età" required>
+
                     <label class="form-label">Ruoli principali</label>
                     <input type="text" name="ruoli" placeholder="es. DC, CC, ATT" required>
+
                     <label class="form-label">Telefono / WhatsApp</label>
                     <input type="text" name="telefono" placeholder="Il tuo numero" required>
-                    <label class="form-label">Discord ID o Note</label>
-                    <textarea name="note" placeholder="Inserisci il tuo Discord o altre info..."></textarea>
+
+                    <label class="form-label">Club precedenti</label>
+                    <input type="text" name="club_precedenti" placeholder="I tuoi team passati">
+
+                    <label class="form-label">Esperienze / Competizioni</label>
+                    <input type="text" name="esperienze" placeholder="VPG, VPL, campionati vinti...">
+
+                    <label class="form-label">Disponibilità (Giorni e Orari)</label>
+                    <input type="text" name="disponibilità" placeholder="es. Lunedì-Giovedì 22:00-00:00">
+
+                    <label class="form-label">Note aggiuntive / Discord ID</label>
+                    <textarea name="note" placeholder="Altre informazioni utili..."></textarea>
+
                     <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
                 </form>
             </div>
