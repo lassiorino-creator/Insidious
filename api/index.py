@@ -96,7 +96,7 @@ def submit():
                     {"name": "📞 Telefono", "value": telefono, "inline": True},
                     {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno"},
                     {"name": "🏆 Esperienze", "value": competizioni or "Nessuna"},
-                    {"name": "📅 Disponibilità", "value": giorni or "Non specificata"},
+                    {"name": "📅 Disponibilità", "value": disponibilità or "Non specificata"},
                     {"name": "📝 Gametarg", "value": note or "Nessuna"}
                 ],
                 "footer": {"text": "Inviato dal sito ufficiale INSIDIOUS FC"}
