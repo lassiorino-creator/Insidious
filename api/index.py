@@ -10,14 +10,12 @@ from flask import Flask, render_template, request, redirect, url_for
 load_dotenv()
 
 # CONFIGURAZIONE PERCORSI PER VERCEL
+# Usiamo ../ perché il file è dentro la cartella /api
 app = Flask(__name__, 
             template_folder="../templates", 
             static_folder="../static")
 
-# Esporta l'oggetto app per Vercel (Risolve l'errore entrypoint)
-app = app
-
-# ATTIVAZIONE ESTENSIONE "DO" PER JINJA2 (Risolve l'errore nel template)
+# ATTIVAZIONE ESTENSIONE "DO" PER JINJA2
 app.jinja_env.add_extension('jinja2.ext.do')
 
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
@@ -28,11 +26,9 @@ def connect_sheet():
     creds_json_string = os.getenv("GOOGLE_CREDENTIALS_JSON")
     
     if creds_json_string:
-        # Online su Vercel
         creds_info = json.loads(creds_json_string)
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_info, scope)
     else:
-        # Locale
         creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
         
     client = gspread.authorize(creds)
@@ -80,7 +76,6 @@ def submit():
         eta = request.form.get('età')
         ruoli = request.form.get('ruoli')
         telefono = request.form.get('telefono')
-        # CORREZIONE: rimosso spazio dal nome della variabile
         club_precedenti = ", ".join(request.form.getlist('club_precedenti'))
         esperienze = request.form.get('esperienze')
         disponibilita = request.form.get('disponibilità')
@@ -120,3 +115,6 @@ def submit():
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
+
+# Necessario per l'entrypoint di Vercel quando il file è in /api
+application = app
