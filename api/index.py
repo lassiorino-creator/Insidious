@@ -14,6 +14,9 @@ app = Flask(__name__,
             template_folder="../templates", 
             static_folder="../static")
 
+# Esporta l'oggetto app per Vercel (Risolve l'errore entrypoint)
+app = app
+
 # ATTIVAZIONE ESTENSIONE "DO" PER JINJA2 (Risolve l'errore nel template)
 app.jinja_env.add_extension('jinja2.ext.do')
 
@@ -46,7 +49,6 @@ def index(page_name=None):
         if not page_name or page_name.lower() == "home":
             current_ws = worksheets[0]
             page_name = current_ws.title
-            # Recupera e pulisce i dati dagli spazi bianchi
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
         elif page_name.lower() == "unisciti":
@@ -64,7 +66,6 @@ def index(page_name=None):
             if not current_ws:
                 return f"Errore: Il foglio '{page_name}' non esiste.", 404
             
-            # Recupera e pulisce i dati dagli spazi bianchi (IMPORTANTE PER I LINK)
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
         
@@ -76,13 +77,15 @@ def index(page_name=None):
 def submit():
     try:
         piattaforma = request.form.get('piattaforma')
-        età = request.form.get('età')
+        eta = request.form.get('età')
         ruoli = request.form.get('ruoli')
         telefono = request.form.get('telefono')
-        club precedenti = ", ".join(request.form.getlist('club precedenti'))
+        # CORREZIONE: rimosso spazio dal nome della variabile
+        club_precedenti = ", ".join(request.form.getlist('club_precedenti'))
         esperienze = request.form.get('esperienze')
-        disponibilità = request.form.get('disponibilità')
+        disponibilita = request.form.get('disponibilità')
         gametarg = request.form.get('gametarg')
+        note = request.form.get('note')
 
         discord_data = {
             "username": "INSIDIOUS RECRUITER",
@@ -90,14 +93,14 @@ def submit():
                 "title": "🚨 NUOVA CANDIDATURA RICEVUTA",
                 "color": 13938487, 
                 "fields": [
-                    {"name": "🎮 Piattaforma", "value": piattaforma, "inline": True},
-                    {"name": "👦 Età", "value": piattaforma, "inline": True},
-                    {"name": "🏃 Ruoli", "value": ruoli, "inline": True},
-                    {"name": "📞 Telefono", "value": telefono, "inline": True},
+                    {"name": "🎮 Piattaforma", "value": piattaforma or "N/A", "inline": True},
+                    {"name": "👦 Età", "value": eta or "N/A", "inline": True},
+                    {"name": "🏃 Ruoli", "value": ruoli or "N/A", "inline": True},
+                    {"name": "📞 Telefono", "value": telefono or "N/A", "inline": True},
                     {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno"},
-                    {"name": "🏆 Esperienze", "value": competizioni or "Nessuna"},
-                    {"name": "📅 Disponibilità", "value": disponibilità or "Non specificata"},
-                    {"name": "📝 Gametarg", "value": note or "Nessuna"}
+                    {"name": "🏆 Esperienze", "value": esperienze or "Nessuna"},
+                    {"name": "📅 Disponibilità", "value": disponibilita or "Non specificata"},
+                    {"name": "📝 Gamertag", "value": gametarg or "Nessuna"}
                 ],
                 "footer": {"text": "Inviato dal sito ufficiale INSIDIOUS FC"}
             }]
@@ -110,10 +113,10 @@ def submit():
         try:
             ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
         except:
-            ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="7")
-            ws_iscrizioni.append_row(["PIATTAFORMA", "ETà", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITà", "GAMETARG"])
+            ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="8")
+            ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG"])
 
-        ws_iscrizioni.append_row([piattaforma, età, ruoli, telefono, club precedenti, esperienze, disponibilità, gametarg])
+        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg])
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
