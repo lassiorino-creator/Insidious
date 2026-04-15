@@ -277,8 +277,12 @@
                     <label class="form-label">Esperienze / Competizioni</label>
                     <input type="text" name="esperienze" placeholder="VPG, VPL, campionati vinti...">
 
-                    <label class="form-label">Disponibilità (Giorni e Orari)</label>
-                    <input type="text" name="disponibilità" placeholder="es. Lunedì-Giovedì 22:00-00:00">
+                    <label class="form-label">Disponibilità (Lun - Gio)</label>
+                    <div class="selection-grid">
+                        <label class="option-box"><input type="checkbox" name="disponibilità" value="Lunedì">Lunedì</label>
+                        <label class="option-box"><input type="checkbox" name="disponibilità" value="Martedì">Martedì</label>
+                        <label class="option-box"><input type="checkbox" name="disponibilità" value="Mercoledì">Mercoledì</label>
+                        <label class="option-box"><input type="checkbox" name="disponibilità" value="Giovedì">Giovedì</label>
 
                     <label class="form-label">Note aggiuntive / Discord ID</label>
                     <textarea name="note" placeholder="Altre informazioni utili..."></textarea>
