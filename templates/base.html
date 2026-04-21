@@ -198,7 +198,6 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            {# LOGICA PNG: Rimuove l'estensione originale e forza .png #}
                             {% set raw_val = row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png' %}
                             {% set name_only = raw_val.split('/')[-1].split('\\')[-1].split('.')[0] %}
                             {% set final_png = name_only + '.png' %}
@@ -223,19 +222,21 @@
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="trophy-card" data-aos="fade-up">
-                            {% set raw_trophy = row[2]|string|trim if (row|length > 2 and row[2]) else 'coppa.png' %}
-                            {% set trophy_name = raw_trophy.split('/')[-1].split('\\')[-1].split('.')[0] %}
-                            <img src="{{ url_for('static', filename=trophy_name + '.png') }}" 
+                            {% set raw_trophy = row[2] if (row|length > 2 and row[2]) else 'coppa.png' %}
+                            <img src="{{ url_for('static', filename=raw_trophy) }}" 
                                  onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
                                  class="trophy-photo">
                             <div class="trophy-info">
                                 <div class="trophy-pos">{{ row[1] }}</div>
                                 <div class="trophy-name">{{ row[0] }}</div>
-                                {% for cell in row[3:] %}
-                                    {% if cell|string|trim|lower[:4] == 'http' %}
-                                        <a href="{{ cell|trim }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
-                                    {% elif cell|string|trim != "" %}
-                                        <div class="trophy-desc">{{ cell|trim }}</div>
+                                
+                                {% for i in range(3, row|length) %}
+                                    {% if row[i] %}
+                                        {% if 'http' in row[i]|lower %}
+                                            <a href="{{ row[i] }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
+                                        {% else %}
+                                            <div class="trophy-desc">{{ row[i] }}</div>
+                                        {% endif %}
                                     {% endif %}
                                 {% endfor %}
                             </div>
