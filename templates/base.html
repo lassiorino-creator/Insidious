@@ -31,17 +31,15 @@
         h1 { font-size: clamp(35px, 8vw, 60px); font-weight: 900; text-transform: uppercase; color: #ffffff; border-left: 8px solid #d4af37; padding-left: 20px; margin-bottom: 40px; letter-spacing: -2px; }
         .role-title { grid-column: 1 / -1; font-size: clamp(28px, 6vw, 55px); font-weight: 900; color: rgba(212, 175, 55, 0.8); text-transform: uppercase; letter-spacing: 6px; margin-top: 60px; margin-bottom: 20px; border-bottom: 2px solid rgba(212, 175, 55, 0.2); width: 100%; scroll-margin-top: 110px; }
         .squadra-grid, .albo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .player-card { position: relative; aspect-ratio: 3/4; background: rgba(17, 17, 17, 0.7); overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.2); }
-        .trophy-card { position: relative; aspect-ratio: 3/4; background: rgba(17, 17, 17, 0.7); overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.2); display: flex; flex-direction: column; }
-        .player-photo { width: 100%; height: 100%; object-fit: cover; filter: grayscale(80%); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
-        .trophy-photo { width: 100%; height: 60%; object-fit: contain; padding: 25px; }
-        .player-info { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 30px; opacity: 0; transition: opacity 0.4s ease; }
-        .trophy-info { flex-grow: 1; display: flex; flex-direction: column; padding: 20px; }
-        .player-card:hover .player-photo { filter: grayscale(0%); transform: scale(1.05); }
-        .player-card:hover .player-info { opacity: 1; }
-        .player-name, .trophy-name { font-size: 20px; font-weight: 900; text-transform: uppercase; color: #fff; line-height: 1.1; }
+        .player-card, .trophy-card { position: relative; aspect-ratio: 3/4; background: rgba(17, 17, 17, 0.7); overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .player-photo, .trophy-photo { width: 100%; height: 100%; object-fit: cover; filter: grayscale(80%); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
+        .trophy-photo { object-fit: contain; padding: 25px; }
+        .player-info, .trophy-info { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 30px; opacity: 0; transition: opacity 0.4s ease; }
+        .player-card:hover .player-photo, .trophy-card:hover .trophy-photo { filter: grayscale(0%); transform: scale(1.05); }
+        .player-card:hover .player-info, .trophy-card:hover .trophy-info { opacity: 1; }
+        .player-name, .trophy-name { font-size: 26px; font-weight: 900; text-transform: uppercase; color: #fff; line-height: 1.1; }
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
-        .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; }
+        .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         .form-container { background-color: rgba(17, 17, 17, 0.85); padding: 40px; border: 1px solid #d4af37; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); max-width: 800px; margin: 0 auto 30px; }
         .form-label { display: block; font-weight: 900; text-transform: uppercase; font-size: 11px; margin: 25px 0 10px 0; color: #d4af37; letter-spacing: 2px; }
         .selection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
@@ -58,7 +56,6 @@
     </style>
 </head>
 <body>
-
     <nav>
         <a href="/" class="nav-logo-link"><img src="{{ url_for('static', filename='logo.png') }}?v=1.1" alt="INSIDIOUS" class="nav-logo-img"></a>
         <div class="menu-toggle" id="mobile-menu"><i class="fas fa-bars"></i></div>
@@ -92,19 +89,16 @@
             </div>
         </div>
     </nav>
-
     <main>
-        <h1 data-aos="fade-right">{{ current_page }}</h1>
-
+        <h1>{{ current_page }}</h1>
         {% if current_page.lower() == 'squadra' %}
             <div class="squadra-grid">
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
-                        <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
+                        <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
-                        <div class="player-card" data-aos="fade-up">
-                            {% set raw_val = row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png' %}
-                            {% set name_only = raw_val.split('/')[-1].split('\\')[-1].split('.')[0] %}
+                        <div class="player-card">
+                            {% set name_only = (row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png').split('/')[-1].split('\\')[-1].split('.')[0] %}
                             <img src="{{ url_for('static', filename=name_only + '.png') }}" onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" class="player-photo">
                             <div class="player-info">
                                 <div class="player-role">{{ row[0] }}</div>
@@ -115,23 +109,21 @@
                     {% endif %}
                 {% endfor %}
             </div>
-
         {% elif 'competizioni' in current_page.lower() %}
             <div class="albo-grid">
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
-                        <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
+                        <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
-                        <div class="trophy-card" data-aos="fade-up">
-                            {% set raw_trophy = row[2]|string|trim if (row|length > 2 and row[2]) else 'coppa.png' %}
-                            {% set trophy_name = raw_trophy.split('/')[-1].split('\\')[-1].split('.')[0] %}
+                        <div class="trophy-card">
+                            {% set trophy_name = (row[2]|string|trim if (row|length > 2 and row[2]) else 'coppa.png').split('/')[-1].split('\\')[-1].split('.')[0] %}
                             <img src="{{ url_for('static', filename=trophy_name + '.png') }}" onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" class="trophy-photo">
                             <div class="trophy-info">
                                 <div class="trophy-pos">{{ row[1] }}</div>
                                 <div class="trophy-name">{{ row[0] }}</div>
                                 {% for cell in row[3:] %}
                                     {% if cell|string|trim|lower[:4] == 'http' %}
-                                        <a href="{{ cell|trim }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 12px; padding: 12px; margin-top: 15px; text-align: center; border-radius: 4px; border: 1px solid #fff; text-transform: uppercase;">VAI AL SITO</a>
+                                        <a href="{{ cell|trim }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
                                     {% elif cell|string|trim != "" %}
                                         <div class="trophy-desc">{{ cell|trim }}</div>
                                     {% endif %}
@@ -141,9 +133,8 @@
                     {% endif %}
                 {% endfor %}
             </div>
-
         {% elif current_page.lower() == 'unisciti' %}
-            <div class="form-container" data-aos="fade-up">
+            <div class="form-container">
                 <form action="/submit" method="post">
                     <label class="form-label">Piattaforma</label>
                     <div class="selection-grid">
@@ -179,7 +170,7 @@
             <div class="home-storia-container">
                 {% for row in content %}
                     {% if row|length >= 2 %}
-                    <div class="storia-item" data-aos="fade-up">
+                    <div class="storia-item">
                         <div class="storia-titolo">{{ row[0] }}</div>
                         <p class="storia-testo">{{ row[1] }}</p>
                     </div>
@@ -188,24 +179,13 @@
             </div>
         {% endif %}
     </main>
-
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: true });
         const menuToggle = document.getElementById('mobile-menu');
         const navContent = document.getElementById('nav-content');
-        menuToggle.addEventListener('click', () => {
-            navContent.classList.toggle('active');
-            const icon = menuToggle.querySelector('i');
-            icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-times');
-        });
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navContent.classList.remove('active');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.add('fa-bars'); icon.classList.remove('fa-times');
-            });
-        });
+        menuToggle.addEventListener('click', () => { navContent.classList.toggle('active'); });
+        document.querySelectorAll('.nav-links a').forEach(link => { link.addEventListener('click', () => { navContent.classList.remove('active'); }); });
     </script>
 </body>
 </html>
