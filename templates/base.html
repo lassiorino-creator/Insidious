@@ -198,9 +198,14 @@
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
+                            {# LOGICA AGGIORNATA PER ISOLARE CORRETTAMENTE IL NOME DEL FILE #}
                             {% set raw_val = row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png' %}
-                            {% set name_only = raw_val.split('/')[-1].split('\\')[-1].split('.')[0] %}
-                            {% set final_png = name_only + '.png' %}
+                            {% set filename_clean = raw_val.split('/')[-1].split('\\')[-1] %}
+                            {% if '.' not in filename_clean and filename_clean != '' %}
+                                {% set final_png = filename_clean + '.png' %}
+                            {% else %}
+                                {% set final_png = filename_clean %}
+                            {% endif %}
                             
                             <img src="{{ url_for('static', filename=final_png) }}" 
                                    onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" 
