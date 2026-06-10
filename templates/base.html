@@ -210,8 +210,8 @@
         <div class="nav-right-container" id="nav-content">
             <ul class="nav-links">
                 {% for item in menu %}
-                    {# Evita che "Partners" compaia due volte se è già presente nella lista dinamica 'menu' #}
-                    {% if item.lower() != 'partners' and item.lower() != 'official partners' %}
+                    {# Evita duplicati se la parola Partners fa già parte della lista dinamica 'menu' #}
+                    {% if item.lower() != 'partners' %}
                     <li class="nav-item">
                         <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
                         {% if item.lower() == 'squadra' %}
@@ -231,7 +231,7 @@
                     </li>
                     {% endif %}
                 {% endfor %}
-                <li class="nav-item"><a href="/official-partners">Partners</a></li>
+                <li class="nav-item"><a href="/partners">Partners</a></li>
                 <li class="nav-item"><a href="/unisciti">Unisciti</a></li>
             </ul>
             <div class="nav-socials">
@@ -245,8 +245,8 @@
     <main>
         <h1 data-aos="fade-right">{{ current_page }}</h1>
 
-        {# CONTROLLO CORRETTO ED ESPLICITO PER LA PAGINA PARTNERS #}
-        {% if current_page.lower() == 'official partners' or current_page.lower() == 'partners' %}
+        {# CONTROLLO CORRETTO SU "partners" #}
+        {% if current_page.lower() == 'partners' %}
             <div class="partners-grid">
                 {% for row in content %}
                     {% if row|length >= 2 and row[1] %}
