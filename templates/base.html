@@ -107,6 +107,54 @@
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
+        /* STILI SPECIFICI PAGINA PARTNERS */
+        .partners-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .partner-card {
+            background: rgba(15, 15, 15, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            backdrop-filter: blur(5px);
+            transition: 0.4s ease;
+        }
+        .partner-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+            transform: translateY(-5px);
+        }
+        .partner-logo {
+            max-width: 80%;
+            max-height: 100px;
+            object-fit: contain;
+            filter: grayscale(100%) brightness(0.8);
+            transition: 0.4s ease;
+        }
+        .partner-card:hover .partner-logo {
+            filter: grayscale(0%) brightness(1);
+        }
+        .partner-name {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #aaa;
+            text-align: center;
+            transition: 0.3s;
+        }
+        .partner-card:hover .partner-name {
+            color: #d4af37;
+        }
+
         /* Form Unisciti */
         .form-container {
             background-color: rgba(17, 17, 17, 0.85); padding: 40px; border: 1px solid #d4af37;
@@ -145,6 +193,8 @@
             .squadra-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .player-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
             .player-name { font-size: 15px; }
+            .partners-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .partner-card { min-height: 160px; padding: 20px 10px; }
         }
     </style>
 </head>
@@ -178,6 +228,7 @@
                     {% endif %}
                 </li>
                 {% endfor %}
+                <li class="nav-item"><a href="/official-partners">Partners</a></li>
                 <li class="nav-item"><a href="/unisciti">Unisciti</a></li>
             </ul>
             <div class="nav-socials">
@@ -191,14 +242,50 @@
     <main>
         <h1 data-aos="fade-right">{{ current_page }}</h1>
 
-        {% if current_page.lower() == 'squadra' %}
+        {% if current_page.lower() == 'official partners' %}
+            <div class="partners-grid">
+                {% for row in content %}
+                    {% if row|length >= 2 and row[1] %}
+                        <div class="partner-card" data-aos="fade-up">
+                            {% set raw_logo = row[1]|string|trim %}
+                            {% set logo_clean = raw_logo.split('/')[-1].split('\\')[-1] %}
+                            {% if '.' not in logo_clean and logo_clean != '' %}
+                                {% set final_logo = logo_clean + '.png' %}
+                            {% else %}
+                                {% set final_logo = logo_clean %}
+                            {% endif %}
+                            
+                            <img src="{{ url_for('static', filename=final_logo) }}" 
+                                 onerror="this.src='{{ url_for('static', filename='logo.png') }}';" 
+                                 class="partner-logo" alt="{{ row[0] }}">
+                            <div class="partner-name">{{ row[0] }}</div>
+                            
+                            {% if row|length >= 3 or row|length >= 4 %}
+                                <div class="partner-socials" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center;">
+                                    {% if row|length > 2 and row[2] and 'tiktok.com' in row[2]|lower %}
+                                        <a href="{{ row[2] }}" target="_blank" style="color: #ff0050; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#ff0050'">
+                                            <i class="fab fa-tiktok"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if row|length > 3 and row[3] and 'instagram.com' in row[3]|lower %}
+                                        <a href="{{ row[3] }}" target="_blank" style="color: #e1306c; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#e1306c'">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+        {% elif current_page.lower() == 'squadra' %}
             <div class="squadra-grid">
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-') }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         <div class="player-card" data-aos="fade-up">
-                            {# LOGICA AGGIORNATA PER ISOLARE CORRETTAMENTE IL NOME DEL FILE #}
                             {% set raw_val = row[2]|string|trim if (row|length > 2 and row[2]) else 'player_insidious.png' %}
                             {% set filename_clean = raw_val.split('/')[-1].split('\\')[-1] %}
                             {% if '.' not in filename_clean and filename_clean != '' %}
