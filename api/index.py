@@ -72,16 +72,25 @@ def index(page_name=None):
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
+        # 1. Recupero dei campi testuali standard dal modulo HTML
         piattaforma = request.form.get('piattaforma')
         eta = request.form.get('età')
         ruoli = request.form.get('ruoli')
         telefono = request.form.get('telefono')
-        club_precedenti = ", ".join(request.form.getlist('club_precedenti'))
+        club_precedenti = request.form.get('club_precedenti')
         esperienze = request.form.get('esperienze')
-        disponibilita = request.form.get('disponibilità')
         gametarg = request.form.get('gametarg')
         note = request.form.get('note')
 
+        # 2. RISOLUZIONE BUG DISPONIBILITÀ MULTIPLA
+        # Recupera l'array di tutti i checkbox spuntati e unisce i giorni con una virgola
+        lista_giorni = request.form.getlist('disponibilità')
+        if lista_giorni:
+            disponibilita = ", ".join(lista_giorni)
+        else:
+            disponibilita = "Non specificata"
+
+        # 3. Costruzione della notifica Discord EMBED completa di ogni informazione richiesto
         discord_data = {
             "username": "INSIDIOUS RECRUITER",
             "embeds": [{
@@ -89,13 +98,14 @@ def submit():
                 "color": 13938487, 
                 "fields": [
                     {"name": "🎮 Piattaforma", "value": piattaforma or "N/A", "inline": True},
-                    {"name": "👦 Età", "value": eta or "N/A", "inline": True},
-                    {"name": "🏃 Ruoli", "value": ruoli or "N/A", "inline": True},
-                    {"name": "📞 Telefono", "value": telefono or "N/A", "inline": True},
-                    {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno"},
-                    {"name": "🏆 Esperienze", "value": esperienze or "Nessuna"},
-                    {"name": "📅 Disponibilità", "value": disponibilita or "Non specificata"},
-                    {"name": "📝 Gamertag", "value": gametarg or "Nessuna"}
+                    {"name": "📝 Gamertag / PSN ID", "value": gametarg or "Nessuna", "inline": True},
+                    {"name": "🎂 Età", "value": eta or "N/A", "inline": True},
+                    {"name": "🏃 Ruoli principali", "value": ruoli or "N/A", "inline": False},
+                    {"name": "📞 Telefono / WhatsApp", "value": telefono or "N/A", "inline": True},
+                    {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno", "inline": False},
+                    {"name": "🏆 Esperienze / Competizioni", "value": esperienze or "Nessuna", "inline": False},
+                    {"name": "📅 Disponibilità (Lun - Gio)", "value": disponibilita, "inline": False},
+                    {"name": "💬 Note aggiuntive / Discord ID", "value": note or "Nessuna nota", "inline": False}
                 ],
                 "footer": {"text": "Inviato dal sito ufficiale INSIDIOUS FC"}
             }]
@@ -104,14 +114,18 @@ def submit():
         if DISCORD_WEBHOOK_URL:
             requests.post(DISCORD_WEBHOOK_URL, json=discord_data)
 
+        # 4. Connessione e scrittura sul foglio di calcolo Google Sheets
         sheet = connect_sheet()
         try:
             ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
         except:
-            ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="8")
-            ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG"])
+            # Se il foglio non esiste, lo crea includendo la nona colonna per le "NOTE"
+            ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="9")
+            ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG", "NOTE"])
 
-        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg])
+        # Salva la riga completa ordinata nel foglio excel
+        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg, note])
+        
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
