@@ -210,23 +210,26 @@
         <div class="nav-right-container" id="nav-content">
             <ul class="nav-links">
                 {% for item in menu %}
-                <li class="nav-item">
-                    <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
-                    {% if item.lower() == 'squadra' %}
-                    <ul class="dropdown-content">
-                        <li><a href="/squadra#staff">Staff</a></li>
-                        <li><a href="/squadra#portieri">Portieri</a></li>
-                        <li><a href="/squadra#difensori">Difensori</a></li>
-                        <li><a href="/squadra#centrocampisti">Centrocampisti</a></li>
-                        <li><a href="/squadra#attaccanti">Attaccanti</a></li>
-                    </ul>
-                    {% elif item.lower() == 'competizioni' %}
-                    <ul class="dropdown-content">
-                        <li><a href="/competizioni#in-corso">In corso</a></li>
-                        <li><a href="/competizioni#albo-doro">Albo d'oro</a></li>
-                    </ul>
+                    {# Evita che "Partners" compaia due volte se è già presente nella lista dinamica 'menu' #}
+                    {% if item.lower() != 'partners' and item.lower() != 'official partners' %}
+                    <li class="nav-item">
+                        <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
+                        {% if item.lower() == 'squadra' %}
+                        <ul class="dropdown-content">
+                            <li><a href="/squadra#staff">Staff</a></li>
+                            <li><a href="/squadra#portieri">Portieri</a></li>
+                            <li><a href="/squadra#difensori">Difensori</a></li>
+                            <li><a href="/squadra#centrocampisti">Centrocampisti</a></li>
+                            <li><a href="/squadra#attaccanti">Attaccanti</a></li>
+                        </ul>
+                        {% elif item.lower() == 'competizioni' %}
+                        <ul class="dropdown-content">
+                            <li><a href="/competizioni#in-corso">In corso</a></li>
+                            <li><a href="/competizioni#albo-doro">Albo d'oro</a></li>
+                        </ul>
+                        {% endif %}
+                    </li>
                     {% endif %}
-                </li>
                 {% endfor %}
                 <li class="nav-item"><a href="/official-partners">Partners</a></li>
                 <li class="nav-item"><a href="/unisciti">Unisciti</a></li>
@@ -242,7 +245,8 @@
     <main>
         <h1 data-aos="fade-right">{{ current_page }}</h1>
 
-        {% if current_page.lower() == 'official partners' %}
+        {# CONTROLLO CORRETTO ED ESPLICITO PER LA PAGINA PARTNERS #}
+        {% if current_page.lower() == 'official partners' or current_page.lower() == 'partners' %}
             <div class="partners-grid">
                 {% for row in content %}
                     {% if row|length >= 2 and row[1] %}
