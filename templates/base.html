@@ -210,8 +210,8 @@
         <div class="nav-right-container" id="nav-content">
             <ul class="nav-links">
                 {% for item in menu %}
-                    {# Evita duplicati se la parola Partners fa già parte della lista dinamica 'menu' #}
-                    {% if item.lower() != 'partners' %}
+                    {# MODIFICA NAVBAR: Salta la stampa se l'elemento è partners o unisciti, gestite fisse alla fine #}
+                    {% if item.lower().strip() != 'partners' and item.lower().strip() != 'unisciti' %}
                     <li class="nav-item">
                         <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
                         {% if item.lower() == 'squadra' %}
@@ -259,6 +259,7 @@
                                 {% set final_logo = logo_clean %}
                             {% endif %}
                             
+                            {# MODIFICA IMMAGINE: src corretta con url_for per caricare correttamente il file logo #}
                             <img src="{{ url_for('static', filename=final_logo) }}" 
                                  onerror="this.src='{{ url_for('static', filename='logo.png') }}';" 
                                  class="partner-logo" alt="{{ row[0] }}">
@@ -334,8 +335,8 @@
                                             <div class="trophy-desc">{{ row[i] }}</div>
                                         {% endif %}
                                     {% endif %}
-                                {% endfor %}
-                            </div>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -417,8 +418,8 @@
             link.addEventListener('click', () => {
                 navContent.classList.remove('active');
                 const icon = menuToggle.querySelector('i');
-                icon.classList.add('fa-bars');
-                icon.classList.remove('fa-times');
+                icon.add('fa-bars');
+                icon.remove('fa-times');
             });
         });
     </script>
