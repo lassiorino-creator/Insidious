@@ -117,12 +117,12 @@
         .partner-card {
             background: rgba(15, 15, 15, 0.85);
             border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 40px 20px;
+            padding: 35px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 220px;
+            min-height: 250px;
             backdrop-filter: blur(5px);
             transition: 0.4s ease;
         }
@@ -133,17 +133,13 @@
         }
         .partner-logo {
             max-width: 80%;
-            max-height: 100px;
+            max-height: 90px;
             object-fit: contain;
-            /* Modificato per evitare che loghi scuri/mancanti spariscano completamente */
-            filter: grayscale(30%) brightness(0.9);
+            filter: brightness(1);
             transition: 0.4s ease;
         }
-        .partner-card:hover .partner-logo {
-            filter: grayscale(0%) brightness(1);
-        }
         .partner-name {
-            margin-top: 20px;
+            margin-top: 15px;
             font-size: 14px;
             font-weight: 800;
             text-transform: uppercase;
@@ -154,6 +150,15 @@
         }
         .partner-card:hover .partner-name {
             color: #d4af37;
+        }
+        .partner-desc {
+            font-size: 12.5px;
+            color: #b0b0b0;
+            margin-top: 12px;
+            text-align: center;
+            font-style: italic;
+            max-width: 90%;
+            line-height: 1.4;
         }
 
         /* Form Unisciti */
@@ -195,7 +200,7 @@
             .player-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
             .player-name { font-size: 15px; }
             .partners-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .partner-card { min-height: 160px; padding: 20px 10px; }
+            .partner-card { min-height: 180px; padding: 20px 10px; }
         }
     </style>
 </head>
@@ -248,36 +253,51 @@
         {% if current_page.lower() == 'partners' %}
             <div class="partners-grid">
                 {% for row in content %}
-                    {% if row|length >= 2 and row[1] %}
+                    {# Controlla solo che la riga contenga almeno il nome del partner #}
+                    {% if row|length >= 1 and row[0] %}
                         <div class="partner-card" data-aos="fade-up">
-                            {% set raw_logo = row[1]|string|trim %}
-                            {% set logo_clean = raw_logo.split('/')[-1].split('\\')[-1] %}
                             
-                            {# Se nel foglio c'è scritto DAVI.png o davi.png mantiene l'estensione, altrimenti aggiunge .png #}
-                            {% if '.' not in logo_clean and logo_clean != '' %}
-                                {% set final_logo = logo_clean + '.png' %}
+                            {# 1. GESTIONE IMMAGINE LOGO (Colonna B -> row[1]) #}
+                            {% if row|length >= 2 and row[1] %}
+                                {% set raw_logo = row[1]|string|trim %}
+                                {% set logo_clean = raw_logo.split('/')[-1].split('\\')[-1] %}
+                                {% if '.' not in logo_clean and logo_clean != '' %}
+                                    {% set final_logo = logo_clean + '.png' %}
+                                {% else %}
+                                    {% set final_logo = logo_clean %}
+                                {% endif %}
+                                <img src="{{ url_for('static', filename=final_logo) }}" class="partner-logo" alt="{{ row[0] }}">
                             {% else %}
-                                {% set final_logo = logo_clean %}
+                                <img src="{{ url_for('static', filename='logo.png') }}" class="partner-logo" alt="{{ row[0] }}">
                             {% endif %}
-                            
-                            <img src="{{ url_for('static', filename=final_logo) }}" 
-                                 class="partner-logo" alt="{{ row[0] }}">
+
+                            {# 2. NOME PARTNER #}
                             <div class="partner-name">{{ row[0] }}</div>
-                            
-                            {% if row|length >= 3 %}
-                                <div class="partner-socials" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center;">
-                                    {% if row[2] and 'tiktok.com' in row[2]|lower %}
-                                        <a href="{{ row[2] }}" target="_blank" style="color: #ff0050; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#ff0050'">
-                                            <i class="fab fa-tiktok"></i>
-                                        </a>
-                                    {% endif %}
-                                    {% if row|length > 3 and row[3] and 'instagram.com' in row[3]|lower %}
-                                        <a href="{{ row[3] }}" target="_blank" style="color: #e1306c; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#e1306c'">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    {% endif %}
-                                </div>
+
+                            {# 3. NUOVO: SPAZIO DESCRIZIONE (Colonna E -> row[4]) #}
+                            {% if row|length >= 5 and row[4] %}
+                                <p class="partner-desc">
+                                    {{ row[4] }}
+                                </p>
                             {% endif %}
+                            
+                            {# 4. SEZIONE SOCIALS (TikTok Colonna C -> row[2], Instagram Colonna D -> row[3]) #}
+                            <div class="partner-socials" style="margin-top: 15px; display: flex; gap: 15px; justify-content: center; min-height: 25px;">
+                                {# TikTok #}
+                                {% if row|length >= 3 and row[2] and 'tiktok.com' in row[2]|lower %}
+                                    <a href="{{ row[2] }}" target="_blank" style="color: #ff0050; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#00f2fe'" onmouseout="this.style.color='#ff0050'">
+                                        <i class="fab fa-tiktok"></i>
+                                    </a>
+                                {% endif %}
+                                
+                                {# Instagram #}
+                                {% if row|length >= 4 and row[3] and 'instagram.com' in row[3]|lower %}
+                                    <a href="{{ row[3] }}" target="_blank" style="color: #e1306c; font-size: 20px; transition: 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#e1306c'">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -412,7 +432,7 @@
             icon.classList.toggle('fa-times');
         });
 
-        // Close menu on click link (Mobile) - Corretto errore .add/.remove su classList
+        // Close menu on click link (Mobile)
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 navContent.classList.remove('active');
