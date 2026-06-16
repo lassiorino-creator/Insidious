@@ -10,7 +10,6 @@ from flask import Flask, render_template, request, redirect, url_for
 load_dotenv()
 
 # CONFIGURAZIONE PERCORSI PER VERCEL
-# Usiamo ../ perché il file è dentro la cartella /api
 app = Flask(__name__, 
             template_folder="../templates", 
             static_folder="../static")
@@ -40,23 +39,27 @@ def index(page_name=None):
     try:
         sheet = connect_sheet()
         worksheets = sheet.worksheets()
-        menu = [ws.title for ws in worksheets if ws.title != "ISCRIZIONI"]
         
-        if not page_name or page_name.lower() == "home":
+        # Genera il menu ripulendo gli spazi bianchi dai titoli dei fogli
+        menu = [ws.title.strip() for ws in worksheets if ws.title.upper().strip() != "ISCRIZIONI"]
+        
+        if not page_name or page_name.lower().strip() == "home":
             current_ws = worksheets[0]
-            page_name = current_ws.title
+            page_name = current_ws.title.strip()
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
-        elif page_name.lower() == "unisciti":
+        elif page_name.lower().strip() == "unisciti":
             data = [] 
             page_name = "Unisciti"
         else:
+            # Converte l'URL (es. "partners") in formato pulito per il confronto
             target_name = page_name.replace('-', ' ').lower().strip()
             current_ws = None
+            
             for ws in worksheets:
                 if ws.title.lower().strip() == target_name:
                     current_ws = ws
-                    page_name = ws.title  
+                    page_name = ws.title.strip()  # Mantiene il nome pulito senza spazi nascosti
                     break
             
             if not current_ws:
@@ -65,7 +68,9 @@ def index(page_name=None):
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
         
-        return render_template('base.html', menu=menu, content=data, current_page=page_name)
+        # Passiamo nel render_template il valore di current_page forzato in minuscolo e senza spazi per il controllo HTML
+        return render_template('base.html', menu=menu, content=data, current_page=page_name, page_id=page_name.lower().strip())
+        
     except Exception as e:
         return f"Errore di connessione: {e}", 500
 
@@ -83,14 +88,13 @@ def submit():
         note = request.form.get('note')
 
         # 2. RISOLUZIONE BUG DISPONIBILITÀ MULTIPLA
-        # Recupera l'array di tutti i checkbox spuntati e unisce i giorni con una virgola
         lista_giorni = request.form.getlist('disponibilità')
         if lista_giorni:
             disponibilita = ", ".join(lista_giorni)
         else:
             disponibilita = "Non specificata"
 
-        # 3. Costruzione della notifica Discord EMBED completa di ogni informazione richiesto
+        # 3. Costruzione della notifica Discord EMBED
         discord_data = {
             "username": "INSIDIOUS RECRUITER",
             "embeds": [{
@@ -114,21 +118,19 @@ def submit():
         if DISCORD_WEBHOOK_URL:
             requests.post(DISCORD_WEBHOOK_URL, json=discord_data)
 
-        # 4. Connessione e scrittura sul foglio di calcolo Google Sheets
+        # 4. Connessione e scrittura sul foglio Google Sheets
         sheet = connect_sheet()
         try:
             ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
         except:
-            # Se il foglio non esiste, lo crea includendo la nona colonna per le "NOTE"
             ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="9")
             ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG", "NOTE"])
 
-        # Salva la riga completa ordinata nel foglio excel
         ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg, note])
         
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
         return f"Errore invio: {e}", 500
 
-# Necessario per l'entrypoint di Vercel quando il file è in /api
+# Entrypoint per Vercel
 application = app
