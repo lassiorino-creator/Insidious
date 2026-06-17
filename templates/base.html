@@ -325,25 +325,39 @@
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
-                        <div class="trophy-card" data-aos="fade-up">
+                        
+                        {# Estrae preventivamente il link se presente #}
+                        {% set link_url = "" %}
+                        {% for i in range(3, row|length) %}
+                            {% if row[i] and 'http' in row[i]|lower %}
+                                {% set link_url = row[i] %}
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="trophy-card" {% if not link_url %}data-aos="fade-up"{% endif %} style="position: relative; display: flex; flex-direction: column;">
                             {% set raw_trophy = row[2] if (row|length > 2 and row[2]) else 'coppa.png' %}
-                            <img src="{{ url_for('static', filename=raw_trophy) }}" 
-                                 onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
-                                 class="trophy-photo" alt="{{ row[0] }}">
-                            <div class="trophy-info">
-                                <div class="trophy-pos">{{ row[1] }}</div>
-                                <div class="trophy-name">{{ row[0] }}</div>
-                                
-                                {% for i in range(3, row|length) %}
-                                    {% if row[i] %}
-                                        {% if 'http' in row[i]|lower %}
-                                            <a href="{{ row[i] }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; margin-top: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff;">VAI AL SITO</a>
-                                        {% else %}
+                            
+                            <div style="position: relative; flex-grow: 1; height: {% if link_url %}80%{% else %}100%{% endif %}; overflow: hidden;">
+                                <img src="{{ url_for('static', filename=raw_trophy) }}" 
+                                     onerror="this.src='{{ url_for('static', filename='coppa.png') }}';" 
+                                     class="trophy-photo" alt="{{ row[0] }}">
+                                <div class="trophy-info">
+                                    <div class="trophy-pos">{{ row[1] }}</div>
+                                    <div class="trophy-name">{{ row[0] }}</div>
+                                    
+                                    {% for i in range(3, row|length) %}
+                                        {% if row[i] and 'http' not in row[i]|lower %}
                                             <div class="trophy-desc">{{ row[i] }}</div>
                                         {% endif %}
-                                    {% endif %}
-                                {% endfor %}
+                                    {% endfor %}
+                                </div>
                             </div>
+
+                            {% if link_url %}
+                                <div style="padding: 10px; background: rgba(17, 17, 17, 0.9); border-top: 1px solid rgba(212, 175, 55, 0.3); z-index: 10;">
+                                    <a href="{{ link_url }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 10px; text-align: center; border-radius: 4px; border: 1px solid #fff; letter-spacing: 1px;">VAI AL SITO</a>
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}
