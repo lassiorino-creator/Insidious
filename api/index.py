@@ -40,10 +40,8 @@ def index(page_name=None):
         sheet = connect_sheet()
         worksheets = sheet.worksheets()
         
-        # Genera il menu escludendo ISCRIZIONI e l'eventuale foglio originale se si chiama ancora Partners
-        menu = [ws.title.strip() for ws in worksheets if ws.title.upper().strip() not in ["ISCRIZIONI", "PARTNERS"]]
-        
-        # Se nel menu non è già visibile "Sponsor" (perché il foglio si chiama ancora in altro modo), lo gestiamo dinamicamente nel template
+        # Genera il menu escludendo le pagine fisse e la vecchia dicitura
+        menu = [ws.title.strip() for ws in worksheets if ws.title.lower().strip() not in ["iscrizioni", "partners", "sponsor"]]
         
         if not page_name or page_name.lower().strip() == "home":
             current_ws = worksheets[0]
@@ -54,7 +52,6 @@ def index(page_name=None):
             data = [] 
             page_name = "Unisciti"
         elif page_name.lower().strip() == "sponsor":
-            # Cerca il foglio che si chiama "Sponsor" o "Partners" (nel caso non sia ancora stato rinominato su Drive)
             current_ws = None
             for ws in worksheets:
                 if ws.title.lower().strip() in ["sponsor", "partners"]:
@@ -63,7 +60,7 @@ def index(page_name=None):
                     break
             
             if not current_ws:
-                return f"Errore: Il foglio per gli Sponsor non è stato trovato.", 404
+                return f"Errore: Il foglio Sponsor non esiste.", 404
                 
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
