@@ -97,13 +97,13 @@
         /* Sollevamento dei Loghi Coppe e Ridimensionamento Bilanciato */
         .trophy-photo { 
             position: absolute;
-            top: 12%; /* Solleva il logo più in alto */
+            top: 12%; 
             left: 50%;
             transform: translateX(-50%);
             width: auto;
             max-width: 85%;
             height: auto;
-            max-height: 43%; /* Riduce l'altezza per evitare sovrapposizioni con il testo */
+            max-height: 43%; 
             object-fit: contain; 
             filter: grayscale(0%); 
             transition: transform 0.3s ease;
@@ -126,7 +126,7 @@
             background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-end; /* Testi agganciati solidamente in basso */
+            justify-content: flex-end; 
             padding: 25px; 
             opacity: 1;
         }
@@ -317,7 +317,7 @@
                             <div class="sponsor-socials">
                                 {% if row|length >= 3 and row[2] and 'tiktok.com' in row[2]|lower %}
                                     <a href="{{ row[2] }}" target="_blank" style="color: #ff0050;"><i class="fab fa-tiktok"></i></a>
-                                Middle {% endif %}
+                                {% endif %}
                                 {% if row|length >= 4 and row[3] and 'instagram.com' in row[3]|lower %}
                                     <a href="{{ row[3] }}" target="_blank" style="color: #e1306c;"><i class="fab fa-instagram"></i></a>
                                 {% endif %}
@@ -430,7 +430,6 @@
                 </form>
             </div>
 
-        {% excuse-me-else %}
         {% else %}
             <div class="home-storia-container">
                 {% for row in content %}
