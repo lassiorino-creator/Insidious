@@ -89,11 +89,26 @@
             position: relative; aspect-ratio: 3/4; background: rgba(17, 17, 17, 0.7);
             overflow: hidden; cursor: pointer; border: 1px solid rgba(212, 175, 55, 0.2);
         }
-        .player-photo, .trophy-photo {
+        .player-photo {
             width: 100%; height: 100%; object-fit: cover; 
             filter: grayscale(80%); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        .trophy-photo { object-fit: contain; padding: 25px; filter: grayscale(0%); }
+
+        /* Sollevamento dei Loghi Coppe e Ridimensionamento Bilanciato */
+        .trophy-photo { 
+            position: absolute;
+            top: 12%; /* Solleva il logo più in alto */
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            max-width: 85%;
+            height: auto;
+            max-height: 43%; /* Riduce l'altezza per evitare sovrapposizioni con il testo */
+            object-fit: contain; 
+            filter: grayscale(0%); 
+            transition: transform 0.3s ease;
+        }
+        .trophy-card:hover .trophy-photo { transform: translateX(-50%) scale(1.03); }
 
         /* Info Giocatori (Restano con Hover) */
         .player-info {
@@ -104,19 +119,23 @@
         .player-card:hover .player-photo { filter: grayscale(0%); transform: scale(1.05); }
         .player-card:hover .player-info { opacity: 1; }
 
-        /* Info Competizioni/Trofei (SEMPRE VISIBILI ALL'AVVIO) */
+        /* Info Competizioni/Trofei (SEMPRE BEN VISIBILI E SENZA OPACITÀ AL LOG-IN) */
         .trophy-info {
-            position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 25px; 
+            position: absolute; 
+            inset: 0; 
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-end; /* Testi agganciati solidamente in basso */
+            padding: 25px; 
             opacity: 1;
         }
-        .trophy-card:hover .trophy-photo { transform: scale(1.03); }
         
         .player-name, .trophy-name { font-size: 26px; font-weight: 900; text-transform: uppercase; color: #fff; line-height: 1.1; }
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
-        /* Bottone Vai Al Sito Integrato */
+        /* Bottone Vai Al Sito Integrato in modo Statico */
         .trophy-btn-container {
             margin-top: 15px;
             width: 100%;
@@ -298,7 +317,7 @@
                             <div class="sponsor-socials">
                                 {% if row|length >= 3 and row[2] and 'tiktok.com' in row[2]|lower %}
                                     <a href="{{ row[2] }}" target="_blank" style="color: #ff0050;"><i class="fab fa-tiktok"></i></a>
-                                {% endif %}
+                                Middle {% endif %}
                                 {% if row|length >= 4 and row[3] and 'instagram.com' in row[3]|lower %}
                                     <a href="{{ row[3] }}" target="_blank" style="color: #e1306c;"><i class="fab fa-instagram"></i></a>
                                 {% endif %}
@@ -411,6 +430,7 @@
                 </form>
             </div>
 
+        {% excuse-me-else %}
         {% else %}
             <div class="home-storia-container">
                 {% for row in content %}
