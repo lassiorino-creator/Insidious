@@ -40,8 +40,8 @@ def index(page_name=None):
         sheet = connect_sheet()
         worksheets = sheet.worksheets()
         
-        # Genera il menu escludendo le pagine fisse e la vecchia dicitura
-        menu = [ws.title.strip() for ws in worksheets if ws.title.lower().strip() not in ["iscrizioni", "partners", "sponsor"]]
+        # Genera il menu escludendo le pagine gestite in modo fisso o speciale
+        menu = [ws.title.strip() for ws in worksheets if ws.title.lower().strip() not in ["iscrizioni", "sponsor"]]
         
         if not page_name or page_name.lower().strip() == "home":
             current_ws = worksheets[0]
@@ -54,13 +54,13 @@ def index(page_name=None):
         elif page_name.lower().strip() == "sponsor":
             current_ws = None
             for ws in worksheets:
-                if ws.title.lower().strip() in ["sponsor", "partners"]:
+                if ws.title.lower().strip() == "sponsor":
                     current_ws = ws
                     page_name = "Sponsor"
                     break
             
             if not current_ws:
-                return f"Errore: Il foglio Sponsor non esiste.", 404
+                return "Errore: Il foglio 'Sponsor' non esiste sul file Excel.", 404
                 
             raw_data = current_ws.get_all_values()
             data = [[cell.strip() for cell in row] for row in raw_data]
@@ -133,7 +133,7 @@ def submit():
             ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="9")
             ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG", "NOTE"])
 
-        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg, note])
+        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, experiences, disponibilita, gametarg, note])
         
         return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
