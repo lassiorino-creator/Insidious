@@ -93,20 +93,45 @@
             width: 100%; height: 100%; object-fit: cover; 
             filter: grayscale(80%); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
-        .trophy-photo { object-fit: contain; padding: 25px; }
+        .trophy-photo { object-fit: contain; padding: 25px; filter: grayscale(0%); } /* Rimosso il grayscale iniziale per i trofei */
 
-        .player-info, .trophy-info {
+        /* Info Giocatori (Restano con Hover) */
+        .player-info {
             position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%);
             display: flex; flex-direction: column; justify-content: flex-end; padding: 30px; 
             opacity: 0; transition: opacity 0.4s ease;
         }
-        .player-card:hover .player-photo, .trophy-card:hover .trophy-photo { filter: grayscale(0%); transform: scale(1.05); }
-        .player-card:hover .player-info, .trophy-card:hover .trophy-info { opacity: 1; }
+        .player-card:hover .player-photo { filter: grayscale(0%); transform: scale(1.05); }
+        .player-card:hover .player-info { opacity: 1; }
+
+        /* Info Competizioni/Trofei (SEMPRE VISIBILI ALL'AVVIO) */
+        .trophy-info {
+            position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 60%);
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 25px; 
+            opacity: 1; /* Sempre visibile */
+        }
+        .trophy-card:hover .trophy-photo { transform: scale(1.03); }
         
         .player-name, .trophy-name { font-size: 26px; font-weight: 900; text-transform: uppercase; color: #fff; line-height: 1.1; }
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
+        /* Bottone Vai Al Sito Integrato */
+        .trophy-btn-container {
+            margin-top: 12px;
+            width: 100%;
+        }
+        .trophy-link-btn {
+            display: block; background: #d4af37; color: #000; text-decoration: none; 
+            font-weight: 900; font-size: 11px; padding: 10px; text-align: center; 
+            border-radius: 4px; border: 1px solid #fff; letter-spacing: 1px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: background 0.2s;
+        }
+        .trophy-link-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
         /* Griglia Sponsor */
         .sponsors-grid {
             display: grid;
@@ -260,32 +285,22 @@
                 {% for row in content %}
                     {% if row is iterable and row|length >= 1 and row[0] and 'png' not in row[0]|lower and 'jpg' not in row[0]|lower %}
                         <div class="sponsor-card" data-aos="fade-up">
-                            
-                            {# Logo #}
                             {% if row|length >= 2 and row[1] and ('png' in row[1]|lower or 'jpg' in row[1]|lower) %}
                                 {% set clean_logo = row[1]|string|trim %}
                                 <img src="{{ url_for('static', filename=clean_logo) }}" class="sponsor-logo" alt="{{ row[0] }}" onerror="this.style.display='none';">
                             {% endif %}
-
-                            {# Nome Sponsor #}
                             <div class="sponsor-name">{{ row[0] }}</div>
-
-                            {# Descrizione #}
                             {% if row|length >= 5 and row[4] %}
                                 <p class="sponsor-desc">{{ row[4] }}</p>
                             {% endif %}
-                            
-                            {# Social #}
                             <div class="sponsor-socials">
                                 {% if row|length >= 3 and row[2] and 'tiktok.com' in row[2]|lower %}
                                     <a href="{{ row[2] }}" target="_blank" style="color: #ff0050;"><i class="fab fa-tiktok"></i></a>
                                 {% endif %}
-                                
                                 {% if row|length >= 4 and row[3] and 'instagram.com' in row[3]|lower %}
                                     <a href="{{ row[3] }}" target="_blank" style="color: #e1306c;"><i class="fab fa-instagram"></i></a>
                                 {% endif %}
                             </div>
-
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -305,10 +320,7 @@
                             {% else %}
                                 {% set final_png = filename_clean %}
                             {% endif %}
-                            
-                            <img src="{{ url_for('static', filename=final_png) }}" 
-                                 onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" 
-                                 class="player-photo" alt="{{ row[1] }}">
+                            <img src="{{ url_for('static', filename=final_png) }}" onerror="this.src='{{ url_for('static', filename='player_insidious.png') }}';" class="player-photo" alt="{{ row[1] }}">
                             <div class="player-info">
                                 <div class="player-role">{{ row[0] }}</div>
                                 <div class="player-name">{{ row[1] }}</div>
@@ -326,7 +338,7 @@
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         
-                        {# Estrae preventivamente il link se presente #}
+                        {# Estrazione preventiva del link #}
                         {% set link_url = "" %}
                         {% for i in range(3, row|length) %}
                             {% if row[i] and 'http' in row[i]|lower %}
@@ -344,18 +356,19 @@
                             <div class="trophy-info">
                                 <div class="trophy-pos">{{ row[1] }}</div>
                                 <div class="trophy-name">{{ row[0] }}</div>
+                                
                                 {% for i in range(3, row|length) %}
                                     {% if row[i] and 'http' not in row[i]|lower %}
                                         <div class="trophy-desc">{{ row[i] }}</div>
                                     {% endif %}
                                 {% endfor %}
-                            </div>
 
-                            {% if link_url %}
-                                <div style="position: absolute; bottom: 15px; left: 15px; right: 15px; z-index: 99;">
-                                    <a href="{{ link_url }}" target="_blank" style="display: block; background: #d4af37; color: #000; text-decoration: none; font-weight: 900; font-size: 11px; padding: 12px; text-align: center; border-radius: 4px; border: 1px solid #fff; letter-spacing: 1px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);">VAI AL SITO</a>
-                                </div>
-                            {% endif %}
+                                {% if link_url %}
+                                    <div class="trophy-btn-container">
+                                        <a href="{{ link_url }}" target="_blank" class="trophy-link-btn">VAI AL SITO</a>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     {% endif %}
                 {% endfor %}
@@ -370,25 +383,18 @@
                         <label class="option-box"><input type="radio" name="piattaforma" value="Playstation" required>PS5</label>
                         <label class="option-box"><input type="radio" name="piattaforma" value="PC" required>PC</label>
                     </div>
-                    
                     <label class="form-label">Gamertag / PSN ID</label>
                     <input type="text" name="gametarg" placeholder="Il tuo ID di gioco" required>
-
                     <label class="form-label">Età</label>
                     <input type="number" name="età" placeholder="La tua età" required>
-
                     <label class="form-label">Ruoli principali</label>
                     <input type="text" name="ruoli" placeholder="es. DC, CC, ATT" required>
-
                     <label class="form-label">Telefono / WhatsApp</label>
                     <input type="text" name="telefono" placeholder="Il tuo numero" required>
-
                     <label class="form-label">Club precedenti</label>
                     <input type="text" name="club_precedenti" placeholder="I tuoi team passati">
-
                     <label class="form-label">Esperienze / Competizioni</label>
                     <input type="text" name="esperienze" placeholder="VPG, VPL, campionati vinti...">
-
                     <label class="form-label">Disponibilità (Lun - Gio)</label>
                     <div class="selection-grid">
                         <label class="option-box"><input type="checkbox" name="disponibilità" value="Lunedì">Lunedì</label>
@@ -396,10 +402,8 @@
                         <label class="option-box"><input type="checkbox" name="disponibilità" value="Mercoledì">Mercoledì</label>
                         <label class="option-box"><input type="checkbox" name="disponibilità" value="Giovedì">Giovedì</label>
                     </div>
-
                     <label class="form-label">Note aggiuntive / Discord ID</label>
                     <textarea name="note" placeholder="Altre informazioni utili..."></textarea>
-
                     <button type="submit" class="submit-btn">INVIA CANDIDATURA</button>
                 </form>
             </div>
