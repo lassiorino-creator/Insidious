@@ -107,14 +107,14 @@
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
-        /* STILI PARTNERS AGGIORNATI */
-        .partners-grid {
+        /* Griglia Sponsor */
+        .sponsors-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
             margin-top: 30px;
         }
-        .partner-card {
+        .sponsor-card {
             background: rgba(10, 10, 10, 0.9);
             border-left: 5px solid #d4af37;
             border-top: 1px solid rgba(212, 175, 55, 0.2);
@@ -123,25 +123,25 @@
             padding: 35px 25px;
             display: flex;
             flex-direction: column;
-            align-items: flex-start; /* Allineamento elegante a sinistra come la storia */
+            align-items: flex-start;
             justify-content: center;
             min-height: 200px;
             backdrop-filter: blur(10px);
             transition: 0.3s ease;
         }
-        .partner-card:hover {
+        .sponsor-card:hover {
             border-color: #d4af37;
             box-shadow: 0 5px 20px rgba(212, 175, 55, 0.15);
             transform: translateY(-3px);
         }
-        .partner-logo {
+        .sponsor-logo {
             max-width: 180px;
             max-height: 75px;
             object-fit: contain;
             margin-bottom: 15px;
             display: block;
         }
-        .partner-name {
+        .sponsor-name {
             font-size: 24px;
             font-weight: 900;
             text-transform: uppercase;
@@ -149,19 +149,19 @@
             letter-spacing: -0.5px;
             margin-bottom: 10px;
         }
-        .partner-desc {
+        .sponsor-desc {
             font-size: 14px;
             color: #cccccc;
             line-height: 1.5;
             margin-bottom: 15px;
             text-align: left;
         }
-        .partner-socials {
+        .sponsor-socials {
             display: flex;
             gap: 15px;
             margin-top: 5px;
         }
-        .partner-socials a {
+        .sponsor-socials a {
             font-size: 20px;
             transition: 0.2s ease;
         }
@@ -204,7 +204,7 @@
             .squadra-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .player-info { opacity: 1; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.95) 30%, transparent 100%); }
             .player-name { font-size: 15px; }
-            .partners-grid { grid-template-columns: 1fr; gap: 15px; }
+            .sponsors-grid { grid-template-columns: 1fr; gap: 15px; }
         }
     </style>
 </head>
@@ -220,7 +220,7 @@
         <div class="nav-right-container" id="nav-content">
             <ul class="nav-links">
                 {% for item in menu %}
-                    {% if item.lower().strip() != 'partners' and item.lower().strip() != 'unisciti' %}
+                    {% if item.lower().strip() not in ['sponsor', 'unisciti'] %}
                     <li class="nav-item">
                         <a href="/{{ item|lower|replace(' ', '-') }}">{{ item }}</a>
                         {% if item.lower() == 'squadra' %}
@@ -240,7 +240,7 @@
                     </li>
                     {% endif %}
                 {% endfor %}
-                <li class="nav-item"><a href="/partners">Partners</a></li>
+                <li class="nav-item"><a href="/sponsor">Sponsor</a></li>
                 <li class="nav-item"><a href="/unisciti">Unisciti</a></li>
             </ul>
             <div class="nav-socials">
@@ -254,30 +254,29 @@
     <main>
         <h1 data-aos="fade-right">{{ current_page }}</h1>
 
-        {# SEZIONE PARTNERS SICURA #}
-        {% if current_page.lower().strip() == 'partners' %}
-            <div class="partners-grid">
+        {# SEZIONE SPONSOR #}
+        {% if page_id == 'sponsor' %}
+            <div class="sponsors-grid">
                 {% for row in content %}
-                    {# Controlla che sia una riga valida e non un'intestazione vuota o testo convertito male #}
-                    {% if row is iterable and row|length >= 1 and row[0] and 'png' not in row[0]|lower %}
-                        <div class="partner-card" data-aos="fade-up">
+                    {% if row is iterable and row|length >= 1 and row[0] and 'png' not in row[0]|lower and 'jpg' not in row[0]|lower %}
+                        <div class="sponsor-card" data-aos="fade-up">
                             
                             {# Logo #}
-                            {% if row|length >= 2 and row[1] and 'png' in row[1]|lower or 'jpg' in row[1]|lower %}
+                            {% if row|length >= 2 and row[1] and ('png' in row[1]|lower or 'jpg' in row[1]|lower) %}
                                 {% set clean_logo = row[1]|string|trim %}
-                                <img src="{{ url_for('static', filename=clean_logo) }}" class="partner-logo" alt="{{ row[0] }}" onerror="this.style.display='none';">
+                                <img src="{{ url_for('static', filename=clean_logo) }}" class="sponsor-logo" alt="{{ row[0] }}" onerror="this.style.display='none';">
                             {% endif %}
 
-                            {# Nome Partner #}
-                            <div class="partner-name">{{ row[0] }}</div>
+                            {# Nome Sponsor #}
+                            <div class="sponsor-name">{{ row[0] }}</div>
 
-                            {# Descrizione Partner (Colonna E -> row[4]) #}
+                            {# Descrizione #}
                             {% if row|length >= 5 and row[4] %}
-                                <p class="partner-desc">{{ row[4] }}</p>
+                                <p class="sponsor-desc">{{ row[4] }}</p>
                             {% endif %}
                             
-                            {# Socials (TikTok Colonna C, Instagram Colonna D) #}
-                            <div class="partner-socials">
+                            {# Social #}
+                            <div class="sponsor-socials">
                                 {% if row|length >= 3 and row[2] and 'tiktok.com' in row[2]|lower %}
                                     <a href="{{ row[2] }}" target="_blank" style="color: #ff0050;"><i class="fab fa-tiktok"></i></a>
                                 {% endif %}
@@ -292,7 +291,7 @@
                 {% endfor %}
             </div>
 
-        {% elif current_page.lower() == 'squadra' %}
+        {% elif page_id == 'squadra' %}
             <div class="squadra-grid">
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
@@ -320,7 +319,7 @@
                 {% endfor %}
             </div>
 
-        {% elif 'competizioni' in current_page.lower() %}
+        {% elif 'competizioni' in page_id %}
             <div class="albo-grid">
                 {% for row in content %}
                     {% if row|length >= 1 and row[0] and (row|length < 2 or not row[1]) %}
@@ -350,7 +349,7 @@
                 {% endfor %}
             </div>
 
-        {% elif current_page.lower() == 'unisciti' %}
+        {% elif page_id == 'unisciti' %}
             <div class="form-container" data-aos="fade-up">
                 <form action="/submit" method="post">
                     <label class="form-label">Piattaforma</label>
@@ -411,7 +410,6 @@
     <script>
         AOS.init({ duration: 800, once: true });
         
-        // Mobile Menu Logic
         const menuToggle = document.getElementById('mobile-menu');
         const navContent = document.getElementById('nav-content');
         menuToggle.addEventListener('click', () => {
@@ -421,7 +419,6 @@
             icon.classList.toggle('fa-times');
         });
 
-        // Close menu on click link (Mobile)
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 navContent.classList.remove('active');
