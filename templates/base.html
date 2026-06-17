@@ -119,11 +119,11 @@
         .player-card:hover .player-photo { filter: grayscale(0%); transform: scale(1.05); }
         .player-card:hover .player-info { opacity: 1; }
 
-        /* Info Competizioni/Trofei (SEMPRE BEN VISIBILI E SENZA OPACITÀ AL LOG-IN) */
+        /* Info Competizioni/Trofei (RIMOSSO IL GRADIENTE OSCURANTE SUL LOGO) */
         .trophy-info {
             position: absolute; 
             inset: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
+            background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 45%, rgba(0,0,0,0) 65%);
             display: flex; 
             flex-direction: column; 
             justify-content: flex-end; 
