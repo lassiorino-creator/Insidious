@@ -392,7 +392,7 @@
 
         {% elif page_id == 'unisciti' %}
             <div class="form-container" data-aos="fade-up">
-                <form id="form-unisciti" onsubmit="inviaCandidatura(event)">
+                <form action="/submit" method="POST">
                     <label class="form-label">Piattaforma</label>
                     <div class="selection-grid">
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>XBOX</label>
@@ -467,19 +467,6 @@
                 }
             });
         });
-
-        function inviaCandidatura(event) {
-            event.preventDefault();
-            const form = event.target;
-            
-            fetch('/submit', {
-                method: 'POST',
-                body: new FormData(form)
-            }).catch(() => {});
-
-            alert("Grazie per la candidatura, verrai ricontattato il prima possibile!");
-            form.reset();
-        }
     </script>
 </body>
 </html>
