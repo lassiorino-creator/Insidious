@@ -94,7 +94,6 @@
             filter: grayscale(80%); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        /* Sollevamento dei Loghi Coppe e Ridimensionamento Bilanciato */
         .trophy-photo { 
             position: absolute;
             top: 12%; 
@@ -110,7 +109,6 @@
         }
         .trophy-card:hover .trophy-photo { transform: translateX(-50%) scale(1.03); }
 
-        /* Info Giocatori (Restano con Hover) */
         .player-info {
             position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 60%);
             display: flex; flex-direction: column; justify-content: flex-end; padding: 30px; 
@@ -119,7 +117,6 @@
         .player-card:hover .player-photo { filter: grayscale(0%); transform: scale(1.05); }
         .player-card:hover .player-info { opacity: 1; }
 
-        /* Info Competizioni/Trofei (RIMOSSO IL GRADIENTE OSCURANTE SUL LOGO) */
         .trophy-info {
             position: absolute; 
             inset: 0; 
@@ -135,7 +132,6 @@
         .player-role, .trophy-pos { color: #d4af37; font-weight: 800; font-size: 11px; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .player-desc, .trophy-desc { font-size: 13px; color: #ccc; margin-top: 8px; font-style: italic; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 5px; }
         
-        /* Bottone Vai Al Sito Integrato in modo Statico */
         .trophy-btn-container {
             margin-top: 15px;
             width: 100%;
@@ -359,7 +355,6 @@
                         <div id="{{ row[0]|lower|replace(' ', '-')|replace("'", "") }}" class="role-title" data-aos="fade-right">{{ row[0] }}</div>
                     {% elif row|length >= 2 %}
                         
-                        {# Estrazione e salvataggio sicuro del link tramite namespace di Jinja #}
                         {% set ns = namespace(link_url="") %}
                         {% for i in range(3, row|length) %}
                             {% if row[i] and 'http' in row[i]|string|lower %}
@@ -384,7 +379,6 @@
                                     {% endif %}
                                 {% endfor %}
 
-                                {# Se la riga contiene un link, genera il pulsante statico #}
                                 {% if ns.link_url != "" %}
                                     <div class="trophy-btn-container">
                                         <a href="{{ ns.link_url }}" target="_blank" class="trophy-link-btn">VAI AL SITO</a>
@@ -398,7 +392,7 @@
 
         {% elif page_id == 'unisciti' %}
             <div class="form-container" data-aos="fade-up">
-                <form action="/submit" method="post" id="candidatura-form">
+                <form id="form-unisciti" onsubmit="inviaCandidatura(event)">
                     <label class="form-label">Piattaforma</label>
                     <div class="selection-grid">
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>XBOX</label>
@@ -474,18 +468,17 @@
             });
         });
 
-        // POPUP DI CONFERMA CANDIDATURA
-        const cForm = document.getElementById('candidatura-form');
-        if (cForm) {
-            cForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                fetch('/submit', {
-                    method: 'POST',
-                    body: new FormData(this)
-                }).catch(() => {});
-                alert("Grazie della sua candidatura, verrà contattato appena possibile.");
-                this.reset();
-            });
+        function inviaCandidatura(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            fetch('/submit', {
+                method: 'POST',
+                body: new FormData(form)
+            }).catch(() => {});
+
+            alert("Grazie per la candidatura, verrai ricontattato il prima possibile!");
+            form.reset();
         }
     </script>
 </body>
