@@ -398,7 +398,7 @@
 
         {% elif page_id == 'unisciti' %}
             <div class="form-container" data-aos="fade-up">
-                <form action="/submit" method="post" id="form-unisciti">
+                <form action="/submit" method="post" id="candidatura-form">
                     <label class="form-label">Piattaforma</label>
                     <div class="selection-grid">
                         <label class="option-box"><input type="radio" name="piattaforma" value="Xbox" required>XBOX</label>
@@ -454,38 +454,35 @@
             menuToggle.addEventListener('click', () => {
                 navContent.classList.toggle('active');
                 const icon = menuToggle.querySelector('i');
-                icon.classList.toggle('fa-bars');
-                icon.classList.toggle('fa-times');
+                if (icon) {
+                    icon.classList.toggle('fa-bars');
+                    icon.classList.toggle('fa-times');
+                }
             });
         }
 
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
-                navContent.classList.remove('active');
-                const icon = menuToggle.querySelector('i');
-                if (icon) {
-                    icon.classList.add('fa-bars');
-                    icon.classList.remove('fa-times');
+                if (navContent) navContent.classList.remove('active');
+                if (menuToggle) {
+                    const icon = menuToggle.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('fa-bars');
+                        icon.classList.remove('fa-times');
+                    }
                 }
             });
         });
 
-        // Intercetta l'invio del form per evitare il crash e mostrare il popup
-        const formUnisciti = id = document.getElementById('form-unisciti');
-        if (formUnisciti) {
-            formUnisciti.addEventListener('submit', async function(e) {
+        // POPUP DI CONFERMA CANDIDATURA
+        const cForm = document.getElementById('candidatura-form');
+        if (cForm) {
+            cForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const formData = new FormData(this);
-
-                try {
-                    await fetch('/submit', {
-                        method: 'POST',
-                        body: formData
-                    });
-                } catch (err) {
-                    console.log(err);
-                }
-
+                fetch('/submit', {
+                    method: 'POST',
+                    body: new FormData(this)
+                }).catch(() => {});
                 alert("Grazie della sua candidatura, verrà contattato appena possibile.");
                 this.reset();
             });
