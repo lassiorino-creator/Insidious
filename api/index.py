@@ -4,7 +4,7 @@ import gspread
 import requests
 from dotenv import load_dotenv
 from oauth2client.service_account import ServiceAccountCredentials
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for
 
 # Carica variabili locali se presenti
 load_dotenv()
@@ -133,12 +133,10 @@ def submit():
             ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="9")
             ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG", "NOTE"])
 
-        # Corretto il nome della variabile da 'experiences' a 'esperienze'
-        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg, note])
+        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, experiences, disponibilita, gametarg, note])
         
-        # Risposta JSON per la gestione client-side con popup
-        return jsonify({"status": "success", "message": "Candidatura inviata con successo!"}), 200
+        return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return f"Errore invio: {e}", 500
 
 application = app
