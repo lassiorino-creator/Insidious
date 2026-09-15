@@ -1,3 +1,37 @@
+import os
+import json
+import gspread
+import requests
+from dotenv import load_dotenv
+from oauth2client.service_account import ServiceAccountCredentials
+from flask import Flask, render_template, request, redirect, url_for
+
+# Carica variabili d'ambiente (.env)
+load_dotenv()
+
+# ISTANZA FLASK (Vercel cerca esattamente la variabile 'app')
+app = Flask(__name__, 
+            template_folder="../templates", 
+            static_folder="../static")
+
+app.jinja_env.add_extension('jinja2.ext.do')
+
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+GOOGLE_SHEET_KEY = os.getenv("GOOGLE_SHEET_KEY")
+
+def connect_sheet():
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds_json_string = os.getenv("GOOGLE_CREDENTIALS_JSON")
+    
+    if creds_json_string:
+        creds_info = json.loads(creds_json_string)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_info, scope)
+    else:
+        creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+        
+    client = gspread.authorize(creds)
+    return client.open_by_key(GOOGLE_SHEET_KEY)
+
 @app.route('/')
 @app.route('/<page_name>')
 def index(page_name=None):
@@ -5,18 +39,13 @@ def index(page_name=None):
         sheet = connect_sheet()
         worksheets = sheet.worksheets()
         
-        # Mappa dei fogli per ricerca rapida (in minuscolo e pulita)
         ws_map = {ws.title.lower().strip(): ws for ws in worksheets}
-        
-        # Genera il menu escludendo le pagine speciali o gestite separatamente
         menu = [ws.title.strip() for ws in worksheets if ws.title.lower().strip() not in ["iscrizioni", "sponsor"]]
         
-        # 1. Caso HOME (Nessun parametro o pagina = 'home')
         if not page_name or page_name.lower().strip() == "home":
             current_ws = ws_map.get("home")
             page_name = "Home"
             
-            # Se non esiste un foglio "Home", prende il primo foglio valido presente nel menu
             if not current_ws and menu:
                 target_title = menu[0]
                 current_ws = ws_map.get(target_title.lower().strip())
@@ -27,12 +56,10 @@ def index(page_name=None):
 
             data = [[cell.strip() for cell in row] for row in current_ws.get_all_values()]
 
-        # 2. Caso UNISCITI (Pagina statica/form)
         elif page_name.lower().strip() == "unisciti":
             data = [] 
             page_name = "Unisciti"
 
-        # 3. Caso SPONSOR
         elif page_name.lower().strip() == "sponsor":
             current_ws = ws_map.get("sponsor")
             if not current_ws:
@@ -41,7 +68,6 @@ def index(page_name=None):
             page_name = "Sponsor"
             data = [[cell.strip() for cell in row] for row in current_ws.get_all_values()]
 
-        # 4. Tutte le altre pagine dinamiche
         else:
             target_key = page_name.replace('-', ' ').lower().strip()
             current_ws = ws_map.get(target_key)
@@ -62,3 +88,54 @@ def index(page_name=None):
         
     except Exception as e:
         return f"Errore di connessione: {e}", 500
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    try:
+        piattaforma = request.form.get('piattaforma')
+        eta = request.form.get('età')
+        ruoli = request.form.get('ruoli')
+        telefono = request.form.get('telefono')
+        club_precedenti = request.form.get('club_precedenti')
+        esperienze = request.form.get('esperienze')
+        gametarg = request.form.get('gametarg')
+        note = request.form.get('note')
+
+        lista_giorni = request.form.getlist('disponibilità')
+        disponibilita = ", ".join(lista_giorni) if lista_giorni else "Non specificata"
+
+        discord_data = {
+            "username": "INSIDIOUS RECRUITER",
+            "embeds": [{
+                "title": "🚨 NUOVA CANDIDATURA RICEVUTA",
+                "color": 13938487, 
+                "fields": [
+                    {"name": "🎮 Piattaforma", "value": piattaforma or "N/A", "inline": True},
+                    {"name": "📝 Gamertag / PSN ID", "value": gametarg or "Nessuna", "inline": True},
+                    {"name": "🎂 Età", "value": eta or "N/A", "inline": True},
+                    {"name": "🏃 Ruoli principali", "value": ruoli or "N/A", "inline": False},
+                    {"name": "📞 Telefono / WhatsApp", "value": telefono or "N/A", "inline": True},
+                    {"name": "🏟️ Club precedenti", "value": club_precedenti or "Nessuno", "inline": False},
+                    {"name": "🏆 Esperienze / Competizioni", "value": esperienze or "Nessuna", "inline": False},
+                    {"name": "📅 Disponibilità (Lun - Gio)", "value": disponibilita, "inline": False},
+                    {"name": "💬 Note aggiuntive / Discord ID", "value": note or "Nessuna nota", "inline": False}
+                ],
+                "footer": {"text": "Inviato dal sito ufficiale INSIDIOUS FC"}
+            }]
+        }
+        
+        if DISCORD_WEBHOOK_URL:
+            requests.post(DISCORD_WEBHOOK_URL, json=discord_data)
+
+        sheet = connect_sheet()
+        try:
+            ws_iscrizioni = sheet.worksheet("ISCRIZIONI")
+        except:
+            ws_iscrizioni = sheet.add_worksheet(title="ISCRIZIONI", rows="1000", cols="9")
+            ws_iscrizioni.append_row(["PIATTAFORMA", "ETÀ", "RUOLI", "TELEFONO", "CLUB PRECEDENTI", "ESPERIENZE", "DISPONIBILITÀ", "GAMETARG", "NOTE"])
+
+        ws_iscrizioni.append_row([piattaforma, eta, ruoli, telefono, club_precedenti, esperienze, disponibilita, gametarg, note])
+        
+        return "<h1>Candidatura inviata!</h1><p>Ti contatteremo presto.</p><a href='/'>Torna alla Home</a>"
+    except Exception as e:
+        return f"Errore invio: {e}", 500
